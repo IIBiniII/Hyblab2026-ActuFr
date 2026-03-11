@@ -12,6 +12,7 @@ let db;
 
 app.get('/init', async function ( req, res ) {
     initialisation();
+    test1();
     res.json({'Ok':true});
 } );
 // Sample endpoint that sends the partner's name
@@ -40,17 +41,18 @@ async function getDB(){
 async function initialisation(){
     const db = await getDB();
     db.exec(`
-    CREATE TABLE Utilisateur(
+    CREATE TABLE IF NOT EXISTS Utilisateur(
         id INTEGER PRIMARY KEY,
         token TEXT
-    ) STRICT
+    ) STRICT;
 
-    CREATE TABLE FilmAime(
-        id_film INTEGER PRIMARY KEY,
-        id_utilisateur INTEGER PRIMARY KEY
-    ) STRICT
+    CREATE TABLE IF NOT EXISTS FilmAime(
+        id_film INTEGER,
+        id_utilisateur INTEGER,
+        PRIMARY KEY (id_film, id_utilisateur)
+    ) STRICT;
 
-    CREATE TABLE Film (
+    CREATE TABLE IF NOT EXISTS Film (
         id INTEGER PRIMARY KEY,
         nom TEXT,
         affiche TEXT,
@@ -60,25 +62,35 @@ async function initialisation(){
         description TEXT, 
         realisateur TEXT,
         date_sortie TEXT
-    ) STRICT 
+    ) STRICT ;
 
-    CREATE TABLE Acteur(
+    CREATE TABLE IF NOT EXISTS Acteur(
         id INTEGER PRIMARY KEY, 
         nom TEXT, 
         prenom TEXT
-    )
+    );
 
-    CREATE TABLE FilmActeur(
-        id_film INTEGER PRIMARY KEY,
-        id_acteur INTEGER PRIMARY KEY
-    )
+    CREATE TABLE IF NOT EXISTS FilmActeur(
+        id_film INTEGER,
+        id_acteur INTEGER,
+        PRIMARY KEY (id_film, id_acteur)
+    );
 
-    CREATE TABLE FilmCoupDeCoeur(
-        id_film INTEGER PRIMARY KEY,
+    CREATE TABLE IF NOT EXISTS FilmCoupDeCoeur(
+        id_film INTEGER UNIQUE PRIMARY KEY,
         date TEXT
-    )
+    );
     `); 
 }
+
+async function test1(){
+    ajoutActeur("Michel","Michel");
+    ajoutFilm("LALALAND","","","BBLABLABLABLABALBALLABBALBLABLABLAL",3,"blablabla","Nom",new Date(2024, 2, 10, 2, 30).toString());
+    ajoutUtilisateur("1235488556");
+    ajoutFilmAime(0,0);
+    
+}
+
 
 // ======================
 // == GET INSTRUCTIONS ==
@@ -187,71 +199,56 @@ async function GetActeursByFilm(idFilm){
 async function ajoutUtilisateur(token){
     const db = await getDB();
 
-    const insert = db.prepare(`
+    const insert = db.run(`
         INSERT INTO Utilisateur (token) VALUES (?)
-    `);
+    `,[token]);
 
-    insert.run(1,token);
 }
 
 async function ajoutFilmAime(id_film, id_utilisateur){
     const db = await getDB();
 
-    const insert = db.prepare(`
-        INSERT INTO FilmAime (id_film, id_utilisateur) VALUES (${id_film}, ${id_utilisateur})
-    `);
-    insert.run(1,id_film);
-    insert.run(2,id_utilisateur);
+    const insert = db.run(`
+        INSERT INTO FilmAime (id_film, id_utilisateur) VALUES (?,?)
+    `,[id_film, id_utilisateur]);
 
 }
 
 async function ajoutFilm(nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie){
     const db = await getDB();
     
-    const insert = db.prepare(`
-        INSERT INTO Film (nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie) VALUES (${nom}, ${affiche}, ${bande_annonce}, ${critique}, ${nb_etoile}, ${description}, ${realisateur}, ${date_sortie})
-    `);
+    const insert = db.run(`
+        INSERT INTO Film (nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie) VALUES (?,?,?,?,?,?,?,?)
+    `,[nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie]);
 
-    insert.run(1,nom);
-    insert.run(2,affiche);
-    insert.run(3,bande_annonce);
-    insert.run(4,critique);
-    insert.run(5,nb_etoile);
-    insert.run(6,description);
-    insert.run(7,realisateur);
-    insert.run(8,date_sortie);
 }
 
 async function ajoutActeur(nom, prenom){
     const db = await getDB();
 
-    const insert = db.prepare(`
-        INSERT INTO Acteur (nom, prenom) VALUES (${nom}, ${prenom})
-    `);
-    insert.run(1,nom);
-    insert.run(2,prenom);
+    const insert = db.run(`
+        INSERT INTO Acteur (nom, prenom) VALUES (?,?)
+    `,[nom,prenom]);
+    
 
 }
 
 async function ajoutFilmActeur(id_film, id_acteur){
     const db = await getDB();
 
-    const insert = db.prepare(`
-        INSERT INTO FilmActeur (id_film, id_acteur) VALUES (${id_film}, ${id_acteur})
-    `);
-    insert.run(1,id_film);
-    insert.run(2,id_acteur);
+    const insert = db.run(`
+        INSERT INTO FilmActeur (id_film, id_acteur) VALUES (?,?)
+    `,[id_film,id_acteur]);
 
 }
 
 async function ajoutFilmCoupDeCoeur(id_film, date){
     const db = await getDB();
 
-    const insert = db.prepare(`
-        INSERT INTO Film (id_film, date) VALUES (${id_film}, ${date})
-    `);
-    insert.run(1,id_film);
-    insert.run(2,date);
+    const insert = db.run(`
+        INSERT INTO Film (id_film, date) VALUES (?,?)
+    `,[id_film,date]);
+    
 
 }
 

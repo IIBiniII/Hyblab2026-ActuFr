@@ -12,21 +12,44 @@
   <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
   <script src="js/list.js" defer></script>
   <script src="js/podium.js" defer></script>
-  <script src="js/Confetti.js" defer></script>
+  <script src="js/confetti.js" defer></script>
 </head>
 <body>
-  <div class="page">
-    <div class="podium">
-      <div class="podiumBack">
-        <div class="topPodium"></div>
-        <div class="bottomPodium" id="podium-container">
-          
+
+  <div class="card-scene">
+    <div class="card" id="flip-card">
+
+      <!-- FRONT -->
+      <div class="card-face card-front">
+        <div class="page">
+          <div class="podium">
+            <div class="podiumBack">
+              <div class="topPodium"></div>
+              <div class="bottomPodium" id="podium-container"></div>
+            </div>
+          </div>
+          <div class="list"></div>
         </div>
       </div>
-    </div>
-    
-    <div class="list"></div>
 
+      <!-- BACK -->
+      <div class="card-face card-back">
+        <div class="page page-back">
+          <div class="back-hero" id="back-hero">
+            <img id="back-hero-img" src="" alt="" class="back-hero-img">
+            <div class="back-hero-hearts">
+              <span class="heart heart-tl">&#10084;</span>
+              <span class="heart heart-br">&#10084;</span>
+            </div>
+          </div>
+          <div class="back-list-container">
+            <div class="back-list" id="back-list"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
+
 </body>
 </html>

@@ -1,80 +1,117 @@
+/* ==================== BASE ==================== */
 html, body {
-    background-color: black;
-    color: white;
-    overflow: hidden;
-    font-family: sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0;
-    width: 100%;
-    height: 100vh;
+  background-color: black;
+  color: white;
+  overflow: hidden;
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0;
+  width: 100%;
+  height: 100vh;
 }
 
+/* ==================== FLIP CARD SCENE ==================== */
+.card-scene {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.card {
+  position: relative;
+  height: 85vh;
+  aspect-ratio: 285 / 539;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.4, 0.2, 0.2, 1);
+  cursor: pointer;
+}
+
+.card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 30px;
+  overflow: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* ==================== FRONT PAGE ==================== */
 .page {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding-top: 30px;
-    box-sizing: border-box; 
-    margin: 0 auto;
-    height: 85vh; 
-    aspect-ratio: 285 / 539; 
-    border-radius: 30px;
-    background: #FFC300;
-    box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 30px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  border-radius: 30px;
+  /* background: #FFF; */
+  background: #fff;
+  box-shadow: 0 4px 4px 0 rgba(0, 0, 0, 0.25);
 }
 
 .podium {
-    display: flex;
-    margin: 0 auto;
-    height: 40vh;
-    aspect-ratio: 257 / 208; 
-    border-radius: 20px;
-    background-color: white;
+  display: flex;
+  margin: 0 auto;
+  height: 40vh;
+  aspect-ratio: 257 / 208;
+  border-radius: 20px;
+  background-color: white;
 }
 
 .podiumBack {
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
-    height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
 }
 
 .topPodium {
-    margin: 0 auto;
-    height: 100%;
-    width: 100%;
-    border-radius: 20px;
-    background-color: white;
+  margin: 0 auto;
+  height: 100%;
+  width: 100%;
+  border-radius: 20px;
+  background-color: white;
 }
 
 .bottomPodium {
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    height: 70%;
-    width: 100%;
-    filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.40));
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 70%;
+  width: 100%;
+  filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.40));
 }
 
 .step {
-    position: relative;
-    background-color: #D7000B;
-    width: 33.33%;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    display: flex;
-    justify-content: center;
-    padding-top: 15px;
-    color: white;
-    font-size: 32px;
-    font-weight: bold;
-    font-family: sans-serif;
-
-    transform: translateY(30px);
+  position: relative;
+  background-color: #D7000B;
+  width: 33.33%;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  display: flex;
+  justify-content: center;
+  padding-top: 15px;
+  color: white;
+  font-size: 32px;
+  font-weight: bold;
+  font-family: sans-serif;
+  transform: translateY(30px);
 }
 
 .step-2 { height: 80%; order: 1; }
@@ -82,32 +119,168 @@ html, body {
 .step-3 { height: 65%; order: 3; }
 
 .step-img {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    
-
-    height: 100%;
-    border-radius: 10%;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    margin-bottom: 5px;
-
-    /* animate */
-    
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  border-radius: 10%;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  margin-bottom: 5px;
 }
 
+/* ==================== BACK PAGE ==================== */
+.page-back {
+  background: #E84040;
+  padding: 20px 16px 16px;
+  gap: 14px;
+  overflow: hidden;
+}
 
+.back-hero {
+  position: relative;
+  width: 100%;
+  flex-shrink: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: rgba(0,0,0,0.15);
+  aspect-ratio: 253 / 290;
+}
 
-/* list */
-/* ===== LIST COMPONENT STYLES ===== */
+.back-hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 18px;
+}
 
+.back-hero-hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.heart {
+  position: absolute;
+  font-size: 2.2em;
+  color: rgba(255, 80, 100, 0.85);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.25));
+  animation: heartbeat 1.6s ease-in-out infinite;
+}
+
+.heart-tl {
+  top: 8px;
+  right: 10px;
+  animation-delay: 0s;
+}
+
+.heart-br {
+  bottom: 12px;
+  left: 10px;
+  animation-delay: 0.4s;
+  font-size: 1.6em;
+  opacity: 0.7;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.18); }
+}
+
+/* ==================== BACK LIST ==================== */
+.back-list-container {
+  flex: 1;
+  background: rgba(255, 200, 200, 0.28);
+  border-radius: 18px;
+  padding: 10px 12px;
+  overflow-y: auto;
+  box-sizing: border-box;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.back-list-container::-webkit-scrollbar {
+  display: none;
+}
+
+.back-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.back-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.15);
+  animation: fadeInDown 0.35s ease both;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.back-item-img {
+  width: 44px;
+  height: 62px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(255,255,255,0.5);
+}
+
+.back-item-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.back-item-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.back-item-critic {
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+}
+
+.back-item-stars {
+  display: flex;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.star {
+  font-size: 13px;
+  color: #FFD600;
+  line-height: 1;
+}
+
+.star.empty {
+  color: rgba(255,255,255,0.3);
+}
+
+/* ==================== LIST (FRONT) ==================== */
 .list-wrapper {
   position: relative;
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  padding: 0 10px;
 }
 
 .list {
@@ -115,13 +288,15 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow: hidden;
+  overflow-y: auto;
   transition: all 0.4s ease;
-  scrollbar-width: none; 
+  scrollbar-width: none;
   -ms-overflow-style: none;
+  box-sizing: border-box;
 }
 
-/* 列表项 */
+.list::-webkit-scrollbar { display: none; }
+
 .list-item {
   display: flex;
   align-items: center;
@@ -129,30 +304,15 @@ html, body {
   padding: 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.05);
-  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.4s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
   overflow: hidden;
-}
-
-.list-item.hidden {
-  display: none;
+  flex-shrink: 0;
 }
 
 .list-item.fade-in {
   animation: fadeInDown 0.35s ease forwards;
 }
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* 电影封面图 */
 .item-img {
   width: 48px;
   height: 68px;
@@ -161,7 +321,6 @@ html, body {
   flex-shrink: 0;
 }
 
-/* 内容区域 */
 .item-content {
   flex: 1;
   display: flex;
@@ -176,10 +335,12 @@ html, body {
 }
 
 .item-title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  color: #fff;
+  color: #000;
+  font-family: Inter;
+  font-size: 10px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: normal;
 }
 
 .item-circle {
@@ -195,9 +356,7 @@ html, body {
   flex-shrink: 0;
 }
 
-.bg-red {
-  background-color: #e84040;
-}
+.bg-red { background-color: #e84040; }
 
 .item-bottom {
   display: flex;
@@ -227,7 +386,7 @@ html, body {
   text-align: right;
 }
 
-/* ===== 展开/收起按钮 ===== */
+/* ==================== TOGGLE BUTTON ==================== */
 .toggle-btn {
   display: flex;
   flex-direction: column;
@@ -270,20 +429,10 @@ html, body {
   transition: transform 0.35s ease;
 }
 
-.toggle-btn:hover .arrow {
-  border-color: rgba(255, 255, 255, 0.9);
-}
+.toggle-btn:hover .arrow { border-color: rgba(255, 255, 255, 0.9); }
+.toggle-btn:hover .dot-line { background: rgba(255, 255, 255, 0.7); }
+.toggle-btn.expanded .arrow svg { transform: rotate(180deg); }
 
-.toggle-btn:hover .dot-line {
-  background: rgba(255, 255, 255, 0.7);
-}
-
-/* 展开状态：箭头旋转 */
-.toggle-btn.expanded .arrow svg {
-  transform: rotate(180deg);
-}
-
-/* 加载状态 */
 .list-loading {
   text-align: center;
   color: rgba(255, 255, 255, 0.4);

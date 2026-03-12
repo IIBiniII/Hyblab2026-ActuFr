@@ -5,7 +5,10 @@
     "image": "img/podium/titanic.jpg",
     "rank": 1,
     "score": 95,
-    "liked": true
+    "liked": true,
+    "critic_rank": 3,
+    "critic_score": 88,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 2,
@@ -13,7 +16,10 @@
     "image": "img/podium/0.jpg",
     "rank": 2,
     "score": 92,
-    "liked": false
+    "liked": false,
+    "critic_rank": 5,
+    "critic_score": 72,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 3,
@@ -21,7 +27,10 @@
     "image": "img/podium/0.jpg",
     "rank": 3,
     "score": 88,
-    "liked": true
+    "liked": true,
+    "critic_rank": 2,
+    "critic_score": 91,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 4,
@@ -29,7 +38,10 @@
     "image": "img/podium/blackPanther.png",
     "rank": 4,
     "score": 75,
-    "liked": false
+    "liked": false,
+    "critic_rank": 4,
+    "critic_score": 78,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 5,
@@ -37,7 +49,10 @@
     "image": "img/podium/lalaland.png",
     "rank": 5,
     "score": 67,
-    "liked": true
+    "liked": true,
+    "critic_rank": 1,
+    "critic_score": 97,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 6,
@@ -45,7 +60,10 @@
     "image": "img/podium/0.jpg",
     "rank": 6,
     "score": 62,
-    "liked": false
+    "liked": false,
+    "critic_rank": 6,
+    "critic_score": 60,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 7,
@@ -53,7 +71,10 @@
     "image": "img/podium/0.jpg",
     "rank": 7,
     "score": 56,
-    "liked": false
+    "liked": false,
+    "critic_rank": 7,
+    "critic_score": 51,
+    "critic_name": "Lauri-Matti Parppei"
   },
   {
     "id": 8,
@@ -61,6 +82,9 @@
     "image": "img/podium/0.jpg",
     "rank": 8,
     "score": 48,
-    "liked": false
+    "liked": false,
+    "critic_rank": 8,
+    "critic_score": 43,
+    "critic_name": "Lauri-Matti Parppei"
   }
 ]

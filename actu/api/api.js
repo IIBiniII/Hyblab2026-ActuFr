@@ -329,7 +329,7 @@ async function recuperation_film_site(){
 
             const etoiles = texte[1]
             .replace(/<.*?>/g, "")
-            .trim();
+            .trim().length;
             const c = critiques[i];
             const strong = c.querySelector("strong");
             if (strong) strong.remove();

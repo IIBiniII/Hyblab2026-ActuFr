@@ -70,7 +70,7 @@ function createCard(nom, critique, image_affiche, nb_etoile, realisateur, lien_b
   const etoiles = document.createElement("div");
   for(let i = 0; i < 4; i++){
     const etoile = document.createElement("img");
-    if (i< nb_etoile){
+    if (i < nb_etoile){
       etoile.setAttribute("src", "img/exemple/etoile.png");
     }
     else{
@@ -81,12 +81,19 @@ function createCard(nom, critique, image_affiche, nb_etoile, realisateur, lien_b
 
   const liens = document.createElement("div");
   const bande_annonce = document.createElement("img");
-  bande_annonce.setAttribute("src", lien_bande_annonce);
+  bande_annonce.setAttribute("src", "img/exemple/playbutton.png");
+  const lien_ba = document.createElement("a");
+  lien_ba.setAttribute("href", lien_bande_annonce);
   const article = document.createElement("img");
-  article.setAttribute("src", lien_article);
+  article.setAttribute("src", "img/exemple/playbutton.png");
+  const lien_articl = document.createElement("a");
+  lien_articl.setAttribute("href", lien_article);
 
-  liens.appendChild(bande_annonce);
-  liens.appendChild(article);
+  lien_articl.appendChild(article);
+  lien_ba.appendChild(bande_annonce);
+
+  liens.appendChild(lien_ba);
+  liens.appendChild(lien_articl);
 
 
   back_div.appendChild(film_title);

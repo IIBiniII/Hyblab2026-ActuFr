@@ -259,7 +259,14 @@ async function recuperation_film_site(){
     const link = `https://cinema.actu.fr/semaine/${year}-${month}-${day}`;
     let resp = null;
     try{
-        resp = await fetch(link);
+        resp = await fetch(link, {
+            "User-Agent": "Mozilla/5.0"
+        });
+        
+        if (!resp.ok) {
+            console.log("HTTP error:", resp.status, link);
+            return [];
+        }
     }catch(e){
         console.log(e);
         console.log(e.message);
@@ -281,8 +288,17 @@ async function recuperation_film_site(){
     // Site Critique
     let res = null;
     try{
+        const link2 = "https://actu.fr/cinema/sorties-films/planetes-scarlet-et-l-eternite-le-testament-d-ann-lee-nos-critiques-des-sorties-du-11-mars_63923715.html";
+        res = await fetch(link2, {
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "text/html; charset=UTF-8"
+        
+        });
 
-        res = await fetch("https://actu.fr/cinema/sorties-films/planetes-scarlet-et-l-eternite-le-testament-d-ann-lee-nos-critiques-des-sorties-du-11-mars_63923715.html",{"Content-Type":"text/html; charset=UTF-8"});
+        if (!res.ok) {
+            console.log("HTTP error:", res.status, link);
+            return [];
+        }
     }catch(e){
         console.log(e);
         console.log(e.message);

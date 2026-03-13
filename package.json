@@ -12,7 +12,6 @@
     "crypto": "^1.0.1",
     "express": "^5.2.1",
     "fs": "^0.0.1-security",
-    "linkedom": "^0.18.12",
     "jsdom": "^28.1.0",
     "linkedom": "^0.18.12",
     "nodemon": "^3.1.14",

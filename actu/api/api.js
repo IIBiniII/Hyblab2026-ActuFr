@@ -1,11 +1,24 @@
 'use strict';
 
 
-
 const app = require( 'express' )();
 const path = require('path');
 const cookieParser = require("cookie-parser");
 const crypto = require("crypto");
+const linkedom = require("linkedom");
+const fs = require("fs");
+const globalagent = require('global-agent');
+
+// Définition des variables HTTP_PROXY si elle ne le sont pas
+// et que http_proxy l'est
+if ( process.env.HTTP_PROXY === undefined && process.env.http_proxy !== undefined)
+    process.env.HTTP_PROXY = process.env.http_proxy;
+if ( process.env.HTTPS_PROXY === undefined && process.env.http_proxy !== undefined)
+    process.env.HTTPS_PROXY = process.env.https_proxy;
+
+// permet aux requêtes fetch de fonctionner même si un proxy est configuré (réseau de l'université)
+globalagent.bootstrap({environmentVariableNamespace: ''});
+
 
 app.use(cookieParser());
 
@@ -17,6 +30,11 @@ let db;
 
 // ROUTES API
 
+
+// =========================
+// ========== GET ==========
+// =========================
+
 app.get('/init', async function ( req, res ) {
     await initialisation();
     await test1();
@@ -25,11 +43,97 @@ app.get('/init', async function ( req, res ) {
     res.json({'Ok':true});
 } );
 
+app.get('/poly', async function ( req, res ) {
+    if(!fs.existsSync("./actu/api/BDD/dataActu.json")){
+        fetch("https://api.actu.fr/posts?filter%5Bmarque%5D=87725", {
+            method: "GET",    
+            headers: {
+                "Content-Type": "application/json",
+                "user-agent": "Hyblab2026"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            fs.writeFileSync("./actu/api/BDD/dataActu.json", JSON.stringify(data, null, 2));
+
+            fs.readFile("./actu/api/BDD/dataActu.json", "utf8", function (err, fileData) {
+                if (err) {
+                    res.json({error:"Les données n'ont pas pu être récupérés !"});
+                    return;
+                }
+                res.json(JSON.parse(fileData));
+            });
+        });
+    }else{
+        fs.readFile("./actu/api/BDD/dataActu.json", "utf8", function (err, fileData) {
+                if (err) {
+                    res.json({error:"Les données n'ont pas pu être récupérés !"});
+                    return;
+                }
+                res.json(JSON.parse(fileData));
+        });
+    }  
+
+} );
+
+function lastWednesday() {
+  const today = new Date()
+  const day = today.getDay()
+
+  const diff = (day - 3 + 7) % 7
+
+  today.setDate(today.getDate() - diff)
+
+  return today
+}
+
+
+// async function getCineActuHTML(){
+//     const res = await fetch("http://localhost:8080/actu/api/poly");
+//     const json = await res.json();
+
+//     const values = Object.values(json);
+//     const target = values[2];
+//     const result = Object.values(target);
+    
+
+//     return result.find(e=>e.id === 63923715)?.content;
+// }
+// async function getCineActuHTML(){
+//     const res = await fetch("https://actu.fr/cinema/sorties-films/planetes-scarlet-et-l-eternite-le-testament-d-ann-lee-nos-critiques-des-sorties-du-11-mars_63923715.html")
+//     const html = await res.text()
+
+//     const { document } = new linkedom.DOMParser().parseFromString(html, "text/html");
+
+
+//     // console.log(document.querySelector("h1").textContent);
+// }
+// getCineActuHTML();
+
+// ROUTES FILMS
 
 app.get('/film-week', async function ( req, res ) {
-    const { last_date } = await GetLastDate();
-    const films = await GetFilmsByDate(last_date);
-    res.json(films);
+    // const { last_date } = await GetLastDate();
+    // const films = await GetFilmsByDate(last_date);
+
+
+    const lastDate = lastWednesday();
+    const day = String(lastDate.getDate()).padStart(2, "0");
+    const month = String(lastDate.getMonth()+1).padStart(2, "0");
+    const year = String(lastDate.getFullYear()); 
+
+    if(!fs.existsSync(`./actu/api/BDD/Films/films-${year}-${month}-${day}.json`)){
+        
+        const ficheObjs = await recuperation_film_site();
+        fs.writeFileSync(`./actu/api/BDD/Films/films-${year}-${month}-${day}.json`, JSON.stringify(ficheObjs, null, 2));
+    }
+    fs.readFile(`./actu/api/BDD/Films/films-${year}-${month}-${day}.json`, "utf8", function (err, fileData) {
+        if (err) {
+            res.json({error:"Les données n'ont pas pu être récupérés !"});
+            return;
+        }
+        res.json(JSON.parse(fileData));
+    });
 } );
 
 app.get('/film-like', async (req, res) => {
@@ -50,6 +154,35 @@ app.get('/film-like', async (req, res) => {
 
 });
 
+//récupérer le classement des films
+app.get('/film-ranking', async (req, res) => {
+
+    const date = await GetLastDate();
+    const films = await GetClassement(date);
+
+    if (films){
+        res.json(films);
+    }
+    else{
+        res.status(401).json({ error: "Aucun films" });
+    }
+});
+
+// récupérer le film coup de coeur de la semaine
+app.get('/film-bestofweek', async (req, res) => {
+
+    const date = await GetLastDate();
+    const film = await GetFilmsCoupDeCoeurByDate(date);
+
+    if (film){
+        res.json(film);
+    }
+    else{
+        res.status(401).json({ error: "Aucun film coup de coeur cette semaine" });
+    }
+});
+
+
 // Sample endpoint that sends the partner's name
 app.get('/topic', function ( req, res ) {
     let topic;
@@ -60,6 +193,27 @@ app.get('/topic', function ( req, res ) {
     res.json({'topic':topic});
 } );
 
+
+// --------acteurs-------------
+
+//récupérer des acteurs par leur film
+app.get('/acteur/:id_film', async (req, res) => {
+
+    const film = parseInt(req.params.id_film);
+
+    const acteurs = await GetActeursByFilm(film);
+
+    if (acteurs){
+        res.json(acteurs);
+    }
+    else{
+        res.status(401).json({ error: "Aucun acteur pour le film " + film});
+    }
+});
+
+
+
+// --------utilisatuers-------------
 
 app.get("/create-user", async (req,res)=>{
 
@@ -95,6 +249,230 @@ function generateToken(){
 
     return token;
 }
+
+function normalize(text) {
+    return text
+        .toLowerCase()
+        .normalize("NFD")                 // sépare les accents
+        .replace(/[\u0300-\u036f]/g, "")  // supprime les accents
+        .replace(/[\u200B-\u200D\uFEFF]/g, "") // zero-width space
+        .replace(/['’]/g, "")             // supprime les apostrophes
+        .trim();
+}
+
+async function recuperation_film_site(){
+    const lastDate = lastWednesday();
+    const day = String(lastDate.getDate()).padStart(2, "0");
+    const month = String(lastDate.getMonth()+1).padStart(2, "0");
+    const year = String(lastDate.getFullYear()); 
+    
+    // Site Fiche ciné
+
+    const link = `https://cinema.actu.fr/semaine/${year}-${month}-${day}`;
+    let resp = null;
+    try{
+        resp = await fetch(link, {
+            "User-Agent": "Mozilla/5.0"
+        });
+        
+        if (!resp.ok) {
+            console.log("HTTP error:", resp.status, link);
+            return [];
+        }
+    }catch(e){
+        console.log(e);
+        console.log(e.message);
+        return [];
+    }
+    const html2 = await resp.text();
+
+    const document  = new linkedom.DOMParser().parseFromString(html2, "text/html");
+    const fiche = document?.body.querySelectorAll(".fiche-film");
+    const ficheObjs = [];
+    for(const f of fiche){
+        const title = f?.querySelector(".fiche-film--description>a>h2").textContent.trim();
+        const realisateur = f?.querySelector(".fiche-film--description>span.fiche-film--description--no-gap>a").textContent.trim();
+        const date = f?.querySelector(".fiche-film--description>span.fiche-film--date>a").textContent.trim();
+        const image = f?.querySelector(".media>img")?.getAttribute("src").replace("_thumb","");
+        ficheObjs.push({title:title,real:realisateur,date:date,affiche:image});
+    }
+
+    // Site Critique
+    let res = null;
+    try{
+        const link2 = "https://actu.fr/cinema/sorties-films/planetes-scarlet-et-l-eternite-le-testament-d-ann-lee-nos-critiques-des-sorties-du-11-mars_63923715.html";
+        res = await fetch(link2, {
+            "User-Agent": "Mozilla/5.0",
+            "Content-Type": "text/html; charset=UTF-8"
+        
+        });
+
+        if (!res.ok) {
+            console.log("HTTP error:", res.status, link);
+            return [];
+        }
+    }catch(e){
+        console.log(e);
+        console.log(e.message);
+        return ficheObjs;
+    }
+    const html = await res.text();
+    // console.log(html);
+
+    const doc = new linkedom.DOMParser().parseFromString(html,"text/html");
+
+    const films = [];
+    const film = doc.querySelectorAll("h2");
+    const critiques = [...doc.querySelectorAll("p.wall-content")].filter(p => p.textContent.trim().length > 0);
+
+    const bande_annonces = doc.querySelectorAll(".ac-embed--youtube");
+
+    for (let i = 0; i< film.length; i++){
+
+        if (film[i].textContent != "Les plus lus"){
+            const titre = film[i].querySelector("em").textContent.toLowerCase();
+            const texte = film[i].innerHTML.split("<br>");
+
+            const realisateur = texte[0]
+            .replace(/<em>.*?<\/em>/, "")
+            .replace(", de", "")
+            .trim();
+            const real = realisateur.replace("&#160;","");
+
+            const etoiles = texte[1]
+            .replace(/<.*?>/g, "")
+            .trim();
+            const c = critiques[i];
+            const strong = c.querySelector("strong");
+            if (strong) strong.remove();
+            const critique = c.textContent;
+            let bande_annonce = null;
+
+            const ba= bande_annonces.filter((e)=>{
+                let title = e.querySelector("iframe").getAttribute("title");
+                title = normalize(title);
+                let match = title.includes(normalize(titre));
+                return match;
+            });
+            if(ba.length>0){
+                bande_annonce = ba[0].querySelector("iframe").getAttribute("data-maybe-src");
+            }
+            
+            const fiches = ficheObjs.filter((f)=> normalize(f.title).includes(normalize(titre)));
+            let ficheObj = null;
+            if(fiches.length>0){
+                ficheObj = fiches[0];
+            }
+            const attributs_film = {
+                "titre" : titre,
+                "realisateur" :real,
+                "critique" :critique,
+                "nb_etoile" : etoiles,
+                "bande_annonce" : bande_annonce,
+                "affiche":ficheObj?.affiche,
+                "date":ficheObj?.date
+            }
+            films.push(attributs_film);
+        }
+    }
+
+    return films;
+};
+// =========================
+// ========== POST =========
+// =========================
+
+//ajouter un film aimé
+app.post("/film-like", async(req, res) => {
+    const {id_film, id_utilisateur} = req.body;
+    if (!id_film || !id_utilisateur){
+        res.status(400).json({ error: 'champs vide' });
+    }
+
+    const film = await ajoutFilmAime(id_film, id_utilisateur);
+    if(!film){
+        res.status(400).json({error: "erreur d'insertion"});
+    }
+    else{
+        res.json({message : "film insérer avec succès voici son id :" + film})
+    }
+});
+
+
+//ajouter un film
+app.post("/film", async(req, res) => {
+    const {nom , affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie} = req.body;
+
+    const film = await ajoutFilm(nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie);
+    if(!film){
+        res.status(400).json({error: "erreur d'insertion"});
+    }
+    else{
+        res.json({message : "film insérer avec succès voici son id :" + film})
+    }
+});
+
+//ajouter un film
+app.post("/film-bestofweek", async(req, res) => {
+    const {id_film, date} = req.body;
+
+    const film = await ajoutFilmCoupDeCoeur(id_film, date);
+    if(!film){
+        res.status(400).json({error: "erreur d'insertion"});
+    }
+    else{
+        res.json({message : "film insérer avec succès voici son id :" + film})
+    }
+});
+
+//ajouter un acteur
+app.post("/acteur", async(req, res) => {
+    const {nom, prenom} = req.body;
+
+    const acteur = await ajoutActeur(nom, prenom);
+    if(!acteur){
+        res.status(400).json({error: "erreur d'insertion"});
+    }
+    else{
+        res.json({message : "acteur insérer avec succès voici son id :" + acteur})
+    }
+});
+
+//ajouter un acteur à un film
+app.post("/acteur-film", async(req, res) => {
+    const {id_film, id_acteur} = req.body;
+
+    const acteur = await ajoutFilmActeur(id_film, id_acteur);
+    if(!acteur){
+        res.status(400).json({error: "erreur d'insertion"});
+    }
+    else{
+        res.json({message : "acteur insérer avec succès voici son id :" + acteur})
+    }
+});
+
+// =========================
+// ========= DELETE ========
+// =========================
+
+app.delete("/film-like/id_film", async(res,req)=>{
+    const id_film = parseInt(req.params.id_film);
+    let token = req.cookie.token;
+    const id_utilisateur = await GetUserByToken(token);
+    const film = supprimeFilmAime(id_film, id_utilisateur);
+    if(!film){
+        res.status(400).json({error: "erreur de suppression"});
+    }
+    else{
+        res.json({message : "film disliké avec succès "});
+    }
+});
+
+
+
+
+
+
 
 // BASE DE DONNEES
 
@@ -480,8 +858,6 @@ async function ajoutUtilisateur(token){
     `,[token]);
 
     return insert.lastID;
-
-
 }
 
 async function ajoutFilmAime(id_film, id_utilisateur){
@@ -492,8 +868,6 @@ async function ajoutFilmAime(id_film, id_utilisateur){
     `,[id_film, id_utilisateur]);
 
     return insert.lastID;
-
-
 }
 
 async function ajoutFilm(nom, affiche, bande_annonce, critique, nb_etoile, description, realisateur, date_sortie){
@@ -516,8 +890,6 @@ async function ajoutActeur(nom, prenom){
 
     return insert.lastID;
 
-    
-
 }
 
 async function ajoutFilmActeur(id_film, id_acteur){
@@ -539,9 +911,16 @@ async function ajoutFilmCoupDeCoeur(id_film, date){
     `,[id_film,date]);
 
     return insert.lastID;
+}
 
-    
+async function supprimeFilmAime(id_film, id_utilisateur){
+    const db = await getDB();
 
+    const deleteQuery = await db.run(`
+        DELETE FROM FilmAime WHERE id_film = ? and id_utilisateur = ?
+    `,[id_film, id_utilisateur]);
+
+    return true;
 }
 
 

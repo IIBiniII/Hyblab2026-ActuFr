@@ -1,8 +1,5 @@
 'use strict'
 
-// const API = "https://hyblab.polytech.univ-nantes.fr/actu/api" 
-// const API = "http://localhost:8080/actu/api" 
-
 async function loadFilm(){
     const filmsResponse = await fetch(API + "/film-week-unknown", { 
         method: "GET",

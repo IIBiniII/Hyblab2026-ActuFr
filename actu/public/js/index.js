@@ -1,6 +1,7 @@
 "use strict"
 
-window.scrollTo(0, 0);
+
+gsap.ticker.fps(30);
 
 
 const affiches = document.querySelector(".affiches");
@@ -15,6 +16,10 @@ let nb_card = 0;
 let nb_tours = Math.round(Math.random() * 30 + 10);
 const distance = 200;
 
+
+function get_current_index() {
+  return (film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length
+}
 
 
 
@@ -46,338 +51,346 @@ loadFilm().then((filmsNodes) => {
       } else {
         tl.reverse();
       }
-    });
+    })
+
   });
-}).finally(()=> {
-  nb_card = film_cards.length;
-  if (film_cards.length === 0) {
-    window.location.href = "podium.html";
-    return;
-  }
-  const rect_poss = Array(nb_card);
-  let timelinesRestantes = 0;
+
+}).finally(() => {
+
+
+  const rect_poss = Array(nb_card)
   film_cards.forEach((elem, index) => {
     rect_poss[index] = elem.getBoundingClientRect();
-  });
-  setTimeout(function () {
+  })
 
-    window.scrollTo(0, 0);
+  //début annimation
+  const tl = gsap.timeline({
+    ease: "linear",
+    onComplete: observer
+  })
 
-    film_cards.forEach((elem, index) => {
+  tl.from(".text_intro h2", {
+    duration: 1.2,
+    y: 80,
+    opacity: 0,
+    ease: "power4.out"
+  })
 
+    .from(".text_intro p", {
+      duration: 1,
+      y: 40,
+      opacity: 0,
+      ease: "power3.out"
+    }, "-=0.6")
 
-      const angle = ((2 * Math.PI) / film_cards.length) * index
+    .from(".logos img", {
+      duration: 0.8,
+      scale: 0,
+      opacity: 0,
+      stagger: 0.2,
+      ease: "back.out(1.7)"
+    }, "-=0.4")
 
+    .to(".text_intro", {
+      duration: 1,
+      x: `-=${window.innerWidth}`,
+      rotateY: "-=700deg",
+      rotateZ: "-=30deg",
+      rotateX: "-=30deg",
+    }, "+=2")
+    .from(".affiches", {
+      filter: "blur(4px)",
+    })
 
+  const total = film_cards.length
+  const getAngle = (i) => ((2 * Math.PI) / total) * i
 
-      const rect = rect_poss[index]
+  gsap.set(affiches, {
+    margin: 0
+  })
 
-      gsap.set(affiches, {
-        margin: 0,
-      })
+  gsap.set(film_cards, {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    x: (i) => rect_poss[i].left,
+    y: (i) => rect_poss[i].top,
+    clearProps: "height,width"
 
-      gsap.set(elem, {
-        position: "absolute",
-        x: rect.left,
-        y: rect.top,
-        top: 0,
-        left: 0
-      });
-
-      timelinesRestantes += 1
-      const t1 = gsap.timeline({ ease: Linear })
-        .eventCallback("onComplete", () => {
-          timelinesRestantes--; // une timeline est finie
-          if (timelinesRestantes === 0) {
-            // Toutes les timelines sont terminées
-            observer(); // votre fonction
-          }
-        });
-
-
-      t1.to(elem, {
-        delay: Math.random(),
-        duration: 2,
-        y: rect.top - 50
-      })
-        .to(elem, {
-          duration: 1,
-          y: Math.sin(angle) * distance + (window.innerHeight / 2),
-          z: Math.cos(angle) * distance,
-          x: (window.innerWidth / 2),
-          scale: degtoscale(angle),
-          xPercent: -50,
-          yPercent: -50,
-        }, 3)
-
-        ;[...Array(nb_tours).keys()].forEach(decalage => {
-          decalage = decalage + 1;
-          const angle = ((2 * Math.PI) / film_cards.length) * ((index + decalage) % film_cards.length)
-
-          t1.to(elem, {
-            duration: 0.5 * (decalage / nb_tours) / 2,
-            y: Math.sin(angle) * distance + (window.innerHeight / 2),// + window.innerHeight/2,
-            z: Math.cos(angle) * distance,
-            x: (window.innerWidth / 2),
-            scale: degtoscale(angle),
-            xPercent: -50,
-            yPercent: -50,
-          })
-        })
+  })
 
 
 
+  tl.to(film_cards, {
+    delay: () => Math.random(),
+    duration: 2,
+    y: (i) => rect_poss[i].top - 50,
+    rotate: (i) => Math.random() * 20 - 10
+  })
 
-      if ((index + nb_tours) % film_cards.length == 0) {
-        t1.to(elem, {
-          duration: 1,
-          x: window.innerWidth / 2 - 100,
-        }, "+=0")
-          .to(zone_contre, {
-            duration: 1,
-            "--transparance_contre": "100%"
-          }, "<")
-          .to(elem, {
-            duration: 1,
-            x: window.innerWidth / 2,
-          }, "+=0")
-          .to(zone_contre, {
-            duration: 1,
-            "--transparance_contre": "70%"
-          }, "<")
+  // placement dans le cercle
+  tl.to(film_cards, {
+    delay: (i) => ((total + (i - (total / 2))) % total) * 0.2,
+    duration: 0.2,
+    x: window.innerWidth / 2,
+    y: (i) => Math.sin(getAngle(i)) * distance + window.innerHeight / 2,
+    z: (i) => Math.cos(getAngle(i)) * distance,
+    rotate: 0,
+    xPercent: -50,
+    yPercent: -50,
+    scale: 1,
+    onComplete: () => {
+      gsap.set(film_cards, { clearProps: "scale" });
+    }
+  })
+  for (let tour = 1; tour <= nb_tours; tour++) {
 
-          .to(elem, {
-            duration: 1,
-            x: window.innerWidth / 2 + 100,
-          }, "+=0")
-          .to(zone_pour, {
-            duration: 1,
-            "--transparance_pour": "0%"
-          }, "<")
-          .to(elem, {
-            duration: 1,
-            x: window.innerWidth / 2,
-          }, "+=0")
-          .to(zone_pour, {
-            duration: 1,
-            "--transparance_pour": "30%"
-          }, "<")
-      } 
+    tl.to(film_cards, {
+      duration: 0.5 * (tour / nb_tours) / 2,
+      xPercent: -50,
+      yPercent: -50,
+
+      y: (i) => {
+        const actual_index = (i + tour) % total
+        const angle = getAngle(actual_index)
+        return Math.sin(angle) * distance + window.innerHeight / 2
+      },
+
+      z: (i) => {
+        const actual_index = (i + tour) % total
+        const angle = getAngle(actual_index)
+        return Math.cos(angle) * distance
+      },
+      x: window.innerWidth / 2,
 
 
     })
-
-  }, 2000);
-  // film_cards[(film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length]?.setAttribute("style", "border:3px solid red;")
+  }
 
 
-});
+  const current_elem = film_cards[get_current_index()]
 
+  tl.to(current_elem, {
+    duration: 1,
+    x: `-=${100}`, // aller à gauche
+    repeat: 1,      // revient automatiquement au centre
+    yoyo: true,
+    ease: "power1.inOut"
+  })
+    .to(zone_contre, {
+      duration: 1,
+      "--transparance_contre": "100%",
+      repeat: 1,
+      yoyo: true,
+      ease: "power1.inOut"
+    }, "<")
+    .to(current_elem, {
+      duration: 1,
+      x: `+=100`, // aller à droite
+      repeat: 1,
+      yoyo: true,
+      ease: "power1.inOut"
+    })
+    .to(zone_pour, {
+      duration: 1,
+      "--transparance_pour": "0%",
+      repeat: 1,
+      yoyo: true,
+      ease: "power1.inOut"
+    }, "<");
+ 
 
-
-
-
-
-//anmation card
-
-
-
-
-
-
-
-
-
-
-///////////////////////
-
-
-
-
-
-
-
-
-
-//
-
-
-
-
+})
 
 
 function observer() {
-  gsap.registerPlugin(Observer);
+    gsap.registerPlugin(Observer);
 
-  let decalageY = 0
-  Observer.create({
-    target: window,
-    type: "touch",
-    debounce: true,
+    let decalageY = 0
+    Observer.create({
+      target: window,
+      type: "touch",
+      debounce: true,
 
-    onChangeY(self) {
+      onChangeY(self) {
 
-      decalageY += self.deltaY / 400;
+        if (Math.abs(decalageX) < 70) {
 
-      if (Math.abs(decalageX) < 70) {
-        film_cards.forEach((elem, index) => {
-          const angle = (((2 * Math.PI) / film_cards.length) * ((index + nb_tours) % film_cards.length)) + decalageY
-          gsap.set(elem, {
-            y: Math.sin(angle) * distance + (window.innerHeight / 2),
-            z: Math.cos(angle) * distance,
-            scale: degtoscale(angle),
+          decalageY += self.deltaY / 400;
 
-          });
+          const getAngle = (i) => (((2 * Math.PI) / film_cards.length) * ((i + nb_tours) % film_cards.length)) + decalageY
+          const current_index = get_current_index()
+          gsap.set(film_cards[current_index], {
+
+            y: () => {
+              const angle = getAngle(current_index)
+              console.log(angle)
+              console.log(decalageY)
+              console.log((((2 * Math.PI) / film_cards.length) * ((current_index + nb_tours) % film_cards.length)))
+              console.log(Math.sin(angle) * distance + window.innerHeight / 2, window.innerHeight / 2)
+              return Math.sin(angle) * distance + window.innerHeight / 2
+            },
+
+
+          })
+
+        }
+
+      },
+
+      onRelease() {
+
+        const curent_index = get_current_index()
+
+        const ang = (((2 * Math.PI) / film_cards.length) * ((curent_index + nb_tours) % film_cards.length)) + decalageY
+        const degangle = Math.round(ang * 180 / Math.PI)
+        const censibiliter = 10
+
+
+        if (degangle > censibiliter) {
+          nb_tours += 1 //Math.round(degangle / (censibiliter * 2))
+        }
+        else if (degangle < -censibiliter) {
+          nb_tours -= 1 //Math.round(-degangle / (censibiliter * 2))
+        }
+
+        decalageY = 0;
+
+        if (Math.abs(decalageX) <= 100) {
+
+          const getAngle = (i) => (((2 * Math.PI) / film_cards.length) * ((i + nb_tours) % film_cards.length))
+          gsap.to(film_cards, {
+            duration: 0.2,
+            y: (i) => {
+              const angle = getAngle(i)
+              return Math.sin(angle) * distance + window.innerHeight / 2
+            },
+
+            z: (i) => {
+              const angle = getAngle(i)
+              return Math.cos(angle) * distance
+            },
+
+          })
+        }
+      }
+    });
+
+    let decalageX = 0;
+
+    let curentX_film_index = null
+
+    Observer.create({
+      target: window,
+      type: "pointer,touch",
+      dragMinimum: 5,
+
+      onChangeX(self) {
+        decalageX += self.deltaX
+
+        if (curentX_film_index == null) {
+          curentX_film_index = (film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length
+        }
+
+        const curent_elem = film_cards[curentX_film_index]
+
+        gsap.set(curent_elem, {
+          x: decalageX + window.innerWidth / 2,
         })
-      }
+        gsap.set(zone_pour, {
+          "--transparance_pour": `${((-30) * (decalageX / (window.innerWidth / 2)) + 30)}%`
+        })
+        gsap.set(zone_contre, {
+          "--transparance_contre": `${((100 - 70) * (decalageX / (-window.innerWidth / 2)) + 70)}%`
+        })
+      },
 
-    },
+      async onRelease() {
+        const curent_elem = film_cards[curentX_film_index]
 
-    onRelease() {
+        if (decalageX > 100) {
+          decalageX = window.innerWidth / 2 + 300;
+          console.log("DROIT");
+          await fetch(API + "/film-like", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              nom_film: film_cards[curentX_film_index].dataset.filmName || "",
+              real_film: film_cards[curentX_film_index].dataset.filmReal || ""
+            })
+          });
 
-      const curent_index = (film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length
+          film_cards.splice(curentX_film_index, 1);
+          updateroue();
+        }
+        else if (decalageX < -100) {
+          decalageX = -window.innerWidth / 2 - 300;
+          console.log("GAUCHE");
+          await fetch(API + "/film-unlike", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              nom_film: film_cards[curentX_film_index].dataset.filmName || "",
+              real_film: film_cards[curentX_film_index].dataset.filmReal || ""
+            })
+          });
 
-      const ang = (((2 * Math.PI) / film_cards.length) * ((curent_index + nb_tours) % film_cards.length)) + decalageY
-      const degangle = Math.round(ang * 180 / Math.PI)
+          film_cards.splice(curentX_film_index, 1);
 
-
-      const censibiliter = 10
-
-
-      if (degangle > censibiliter) {
-        nb_tours += 1 //Math.round(degangle / (censibiliter * 2))
-      }
-      else if (degangle < -censibiliter) {
-        nb_tours -= 1 //Math.round(-degangle / (censibiliter * 2))
-      }
-
-      decalageY = 0;
-
-      film_cards.forEach((elem, index) => {
-        const angle = (((2 * Math.PI) / film_cards.length) * ((index + nb_tours) % film_cards.length))
-
-        gsap.to(elem, {
-          duration: 0.2,
-          y: Math.sin(angle) * distance + (window.innerHeight / 2),
-          z: Math.cos(angle) * distance,
-          scale: degtoscale(angle),
-        });
-      })
-    }
-
-
-  });
-
-  let decalageX = 0;
-
-  let curentX_film_index = null
-
-  Observer.create({
-    target: window,
-    type: "pointer,touch",
-    dragMinimum: 5,
-
-    onChangeX(self) {
-      decalageX += self.deltaX
-
-      if (curentX_film_index == null) {
-        curentX_film_index = (film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length
-      }
-
-      gsap.set(film_cards[curentX_film_index], {
-        x: decalageX + window.innerWidth / 2,
-      })
-      gsap.set(zone_pour, {
-        "--transparance_pour": `${((-30) * (decalageX / (window.innerWidth / 2)) + 30)}%`
-      })
-      gsap.set(zone_contre, {
-        "--transparance_contre": `${((100 - 70) * (decalageX / (-window.innerWidth / 2)) + 70)}%`
-      })
-    },
-
-    async onRelease() {
-      const curent_elem = film_cards[curentX_film_index]
-
-      if (decalageX > 100) {
-        decalageX = window.innerWidth / 2 + 300;
-        console.log(film_cards[curentX_film_index]);
-        console.log("DROIT");
-        await fetch(API + "/film-like", { 
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            nom_film: film_cards[curentX_film_index].dataset.filmName || "",
-            real_film: film_cards[curentX_film_index].dataset.filmReal || ""
-          })
-        });
-        
-        film_cards.splice(curentX_film_index, 1);
-        updateroue();
-      }
-      else if (decalageX < -100) {
-        decalageX = -window.innerWidth / 2 - 300;
-        console.log("GAUCHE");
-        await fetch(API + "/film-unlike", { 
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            nom_film: film_cards[curentX_film_index].dataset.filmName || "",
-            real_film: film_cards[curentX_film_index].dataset.filmReal || ""
-          })
-        });
-
-        film_cards.splice(curentX_film_index, 1);
-
-        updateroue();
-      } else {
-        decalageX = 0;
-      }
-
-      gsap.timeline().to(curent_elem, {
-        duration: 0.2,
-        x: decalageX + window.innerWidth / 2,
-        onComplete() {
+          updateroue();
+        } else {
           decalageX = 0;
         }
-      })
-      .to(zone_pour, {
-        duration: 0.2,
-        "--transparance_pour": `${((-30) * (decalageX / (window.innerWidth / 2)) + 30)}%`
-      }, "<")
-      .to(zone_contre, {
-        duration: 0.2,
-        "--transparance_contre": `${((100 - 70) * (decalageX / (-window.innerWidth / 2)) + 70)}%`
-      }, "<")
-      
-      curentX_film_index = null
-    }
-  })
-}
 
+        gsap.timeline().to(curent_elem, {
+          duration: 0.2,
+          x: decalageX + window.innerWidth / 2,
+          onComplete() {
+            decalageX = 0;
+          }
+        })
+          .to(zone_pour, {
+            duration: 0.2,
+            "--transparance_pour": `${30}%`
+          }, "<")
+          .to(zone_contre, {
+            duration: 0.2,
+            "--transparance_contre": `${70}%`
+          }, "<")
+
+        curentX_film_index = null
+      }
+    })
+  }
 
 
 function updateroue() {
   if (film_cards.length === 0) {
     window.location.href = "podium.html";
-  } 
+  }
   film_cards.forEach((elem, index) => {
     const angle = (((2 * Math.PI) / film_cards.length) * ((index + nb_tours) % film_cards.length))
 
-    gsap.to(elem, {
+    const getAngle = (i) => (((2 * Math.PI) / film_cards.length) * ((i + nb_tours) % film_cards.length))
+    gsap.to(film_cards, {
       duration: 0.2,
-      y: Math.sin(angle) * distance + (window.innerHeight / 2),
-      z: Math.cos(angle) * distance,
-      scale: degtoscale(angle),
-    });
+      y: (i) => {
+        const angle = getAngle(i)
+        return Math.sin(angle) * distance + window.innerHeight / 2
+      },
+
+      z: (i) => {
+        const angle = getAngle(i)
+        return Math.cos(angle) * distance
+      },
+
+    })
+
   })
 }
-
-
-
-// function sendLike()

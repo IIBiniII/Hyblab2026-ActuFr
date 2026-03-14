@@ -3,8 +3,12 @@ function averageColor(img) {
   const colorThief = new ColorThief();
   const color = colorThief.getColor(img);
 
-  return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+  return {r: color[0], g:color[1], b : color[2]};
   
+}
+
+function getBrightness({r, g, b}) {
+  return (r * 299 + g * 587 + b * 114) / 1000;
 }
 
 function createFrontCard(titre, affiche, genre, realisateur){
@@ -15,12 +19,10 @@ function createFrontCard(titre, affiche, genre, realisateur){
 
   const front = document.createElement("div");
   front.classList.add("affiche_front");
-
-  image.onload = () => {
-    const color = averageColor(image);
-    front.style.backgroundColor = color;
-  };
-
+  
+  let color = "#FFF"
+  let color_text = "#000"
+  front.style.backgroundColor = color;
 
   const img = document.createElement("img");
   img.src = affiche;//"img/exemple/affiche_cine.png";
@@ -29,12 +31,30 @@ function createFrontCard(titre, affiche, genre, realisateur){
 
   const title = document.createElement("h3");
   title.innerText = titre;
+  title.style.color = color_text
 
   const genre_span = document.createElement("span");
   genre_span.innerText = genre;
+  genre_span.style.color = color_text
+
 
   const real_span = document.createElement("span");
   real_span.innerText = realisateur;
+  real_span.style.color = color_text
+
+
+  image.onload = () => {
+    const rgbcolor = averageColor(image);
+    const brightness = getBrightness(rgbcolor)
+    color = `rgb(${rgbcolor.r}, ${rgbcolor.g}, ${rgbcolor.b})`
+
+    color_text = (brightness > 155) ? "black" : "white"
+    front.style.backgroundColor = color;
+    title.style.color = color_text
+    genre_span.style.color = color_text
+    real_span.style.color = color_text
+  };
+
 
   info.appendChild(title);
   info.appendChild(genre_span);
@@ -107,6 +127,18 @@ function createCard(titre,affiche, genre, realisateur, critique,nb_etoile,lien_b
   section.classList.add("film");
   section.setAttribute("data-film-name",titre);
   section.setAttribute("data-film-real",realisateur);
+
+
+  const init_scale = 0.3
+  const init_width = 335*init_scale
+  const init_height = 613*init_scale
+  const init_style = 
+    `transform: scale(${init_scale});
+    width: ${init_width}px;
+    height:  ${init_height}px;`
+
+    
+  section.setAttribute("style",init_style)
 
   const front = createFrontCard(titre,affiche==null?"img/affiche-cine.png":affiche, genre==null?"Film":genre, realisateur);
   const back = createBackCard(titre, affiche==null?"img/affiche-cine.png":affiche, critique,nb_etoile,lien_bande_annonce, lien_article);

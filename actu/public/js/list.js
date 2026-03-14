@@ -1,49 +1,124 @@
 const MovieList = (() => {
   let allMovies = [];
   let isExpanded = false;
+  const API = "http://localhost:8080/actu/api" ;
 
-  async function loadMovies(jsonPath = 'data/movies.json') {
-    try {
-      const res = await fetch(jsonPath);
-      if (!res.ok) throw new Error('Failed to load movies.json');
-      allMovies = await res.json();
-      render();
-    } catch (e) {
-      console.error(e);
-      const list = document.querySelector('.list');
-      if (list) list.innerHTML = '<div class="list-loading">Failed to load movies.json</div>';
-    }
+  //pour tester sans les données de la route /film-ranking
+  // async function loadFilm() {
+  //   const filmsResponse = await fetch(API + "/film-week", {
+  //       method: "GET",
+  //       credentials: "include"
+  //   });
+  //   const film = await filmsResponse.json();
+  //   allMovies = film;
+  //   render();
+  //   const films = [];
+  //   film.forEach(element => {
+  //     const titre = element.titre;
+  //     const realisateur = element.realisateur;
+  //     const critique = element.critique;
+  //     const etoiles = element.nb_etoile;
+  //     const bande_annonce = element.bande_annonce;
+  //     const affiche = element.affiche;
+
+  //     const film = {
+  //         "titre" :titre,
+  //         "affiche" :affiche,
+  //         "realisateur" :realisateur,
+  //         "nb_like":34,
+  //         "rank": 4,// récupéere le rank dans le clasement
+  //     }
+
+  //     films.push(film);
+  //   });
+  //   return films;
+  // }
+
+  async function loadClassement(){
+    const classementResponse = await fetch(API + "/film-ranking", {
+        method: "GET",
+        credentials: "include"
+    });
+    const classement = await classementResponse.json();
+    allMovies = classement;
+    render();
+    const filmsAimeResponse = await fetch(API + "/film-ranking", {
+        method: "GET",
+        credentials: "include"
+    });
+    const filmsAime = await filmsAimeResponse.json();
+
+    let list = [];
+    let i= 0;
+    classement.forEach(async element => {
+        const rank = i;
+        i +=1;
+        const id_film = element.film;
+        const filmResponse = await fetch(API + "/film/"+id_film , {
+            method: "GET",
+            credentials: "include"
+        });
+        const _film = await filmResponse.json();
+        console.log(_film);
+        const titre = _film.titre;
+        const affiche = _film.affiche;
+        const realisateur = _film.realisateur;
+        const nb_like = element.nb_likes;
+
+        const film = {
+          "titre" :titre,
+          "affiche" :affiche,
+          "realisateur" :realisateur,
+          "nb_like":nb_like,
+          "rank": i, 
+        }
+
+        filmsAime.forEach(film => {
+          if(element.titre == film.titre){
+            film[aime] = true;
+          }
+          else{
+            film[aime] = false;
+          }
+      })
+      console.log(film);
+      list.push(film);
+
+    })
+    render();
+    return list;
   }
 
-  function createItem(movie, index, isNew = false) {
+  //un item de la liste = un film
+  function createItem(affiche, titre, realisateur, rank, nb_like, index, isNew = false) {
     const div = document.createElement('div');
     div.className = 'list-item' + (isNew ? ' fade-in' : '');
     div.style.animationDelay = isNew ? `${index * 60}ms` : '0ms';
     div.style.flexShrink = '0';
     div.innerHTML = `
-    <img src="${movie.image}" alt="${movie.title}" class="item-img">
+    <img src="${affiche}" alt="${titre}" class="item-img">
     <div class="item-content">
       
       <div class="item-top">
         <div class="item-info">
-          <span class="item-title">${movie.title}</span>
-          <span class="item-director">${movie.director}</span>
+          <span class="item-title">${titre}</span>
+          <span class="item-director">${realisateur}</span>
         </div>
-        <span class="item-rank">${movie.rank}</span>
+        <span class="item-rank">${rank}</span>
       </div>
       
       <div class="item-bottom">
         <div class="progress-wrapper">
-          <div class="thumb-icon" style="left: calc(${movie.score}% - 8px);">
+          <div class="thumb-icon" style="left: calc(${nb_like}% - 8px);">
             <img src="img/podium/thumb.svg" alt="Thumb Icon" class="thumb-img">
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" style="width: ${movie.score}%;">
+            <div class="progress-fill" style="width: ${nb_like}%;">
 
             </div>
           </div>
         </div>
-        <span class="item-percent">${movie.score}%</span>
+        <span class="item-percent">${nb_like}%</span>
       </div>
 
     </div>
@@ -51,12 +126,20 @@ const MovieList = (() => {
     return div;
   }
 
-  function render(animate = false) {
+  //création de la liste liké
+  async function render(animate = false) {
+
     const list = document.querySelector('.list');
     if (!list) return;
 
-    const likedMovies = allMovies.filter(m => m.liked);
-    const moviesToShow = isExpanded ? allMovies : likedMovies;
+    //récupération des films liké par l'utilisateur
+    let likedMovies = [];
+    const filmsClassement = await loadClassement();
+    filmsClassement.forEach(e =>{
+      if (e.aime){
+        likedMovies.push(e);
+      }
+    })
 
     const existingIds = new Set(
       [...list.querySelectorAll('.list-item')].map(el => el.dataset.id)
@@ -64,12 +147,23 @@ const MovieList = (() => {
 
     list.innerHTML = '';
 
-    moviesToShow.forEach((movie, i) => {
+    let i = likedMovies.length;
+
+    if (i = 1 ){
+      const film = likedMovies[0];
       const isNew = animate && !existingIds.has(String(movie.id));
-      const item = createItem(movie, i, isNew);
-      item.dataset.id = movie.id;
+      const item = createItem(film.affiche, film.titre, film.realisateur, film.rank, film.nb_like, i, isNew);
+      item.dataset.id =5;
       list.appendChild(item);
-    });
+    }
+    else if (i > 1 ){
+      likedMovies.forEach(element => {
+        const isNew = animate && !existingIds.has(String(movie.id));
+        const item = createItem(element.affiche, element.titre, element.realisateur, element.rank, element.nb_like, i, isNew);
+        item.dataset.id =5;
+        list.appendChild(item);
+      });
+    }
   }
 
   function toggle() {
@@ -160,7 +254,7 @@ const MovieList = (() => {
 
   function init(jsonPath) {
     initToggleButton();
-    loadMovies(jsonPath);
+    loadClassement();
   }
 
   return { init };

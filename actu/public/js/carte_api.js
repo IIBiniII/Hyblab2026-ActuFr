@@ -37,10 +37,9 @@ async function loadFilm(){
     });
 
 }
-loadFilm()
+loadFilm();
 
 async function loadClassement(){
-    let list_classement = [];
     const classementResponse = await fetch(API + "/film-ranking", {
         method: "GET",
         credentials: "include"
@@ -48,24 +47,58 @@ async function loadClassement(){
     const classement = await classementResponse.json();
     //titre + nb de likes
     classement.forEach(async element => {
-        const id_film = element.film; //c'est l'ID
-        // const filmResponse = await fetch(API + "/film/"+id_film , {
-        //     method: "GET",
-        //     credentials: "include"
-        // });
-        // const film = await filmResponse.json();
-        const nb_like = element.nb_likes;
+        const id_film = element.film;
+        const filmResponse = await fetch(API + "/film/"+id_film , {
+            method: "GET",
+            credentials: "include"
+        });
+        const film = await filmResponse.json();
+        const titre = film.titre;
+        const affiche = film.affiche;
+        const realisateur = film.realisateur;
+        const nb_like = element.nb_likes;   
     })
-
 }
 
 // loadClassement()
 
 async function loadCoupDeCoeur(){
-    const filmResponse = await fetch(API + "/film-bestofweek", {
+    const filmCoeurResponse = await fetch(API + "/film-bestofweek", {
+        method: "GET",
+        credentials: "include"
+    });
+    const filmCoeur = await filmCoeurResponse.json();
+    const id_film = film.id_film;
+    const filmResponse = await fetch(API + "//film-id/"+id_film, {
         method: "GET",
         credentials: "include"
     });
     const film = await filmResponse.json();
-    return film;
+    const affiche = film.affiche;
+}
+
+async function loadFilmAime(){
+    //juste des id des films
+    const filmsResponse = await fetch(API + "/film-like", {
+        method: "GET",
+        credentials: "include"
+    });
+    const films = await filmsResponse.json(); //id_film, id_utilisateur
+    films.forEach(element =>{
+        const id_film = element.id_film;
+    })
+}
+
+async function ajoutLike(film){
+    const response = await fetch(API + "/film-like", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id_film : film,
+        })
+    });
+    const data = await response.json();
 }

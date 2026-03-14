@@ -142,6 +142,20 @@ app.get('/film-like', async (req, res) => {
 
 });
 
+//récuperer un film par son id
+app.get('/film-id/:id', async (req, res) => {
+
+    const id_film = parseInt(req.params.id_film);
+    const film = await GetFilmsById(id_film);
+
+    if (film){
+        res.json(film);
+    }
+    else{
+        res.status(401).json({ error: "Aucun film avec cet ID" });
+    }
+});
+
 //récupérer le classement des films
 app.get('/film-ranking', async (req, res) => {
 
@@ -372,18 +386,30 @@ async function recuperation_film_site(){
 
 //ajouter un film aimé
 app.post("/film-like", async(req, res) => {
-    const {id_film, id_utilisateur} = req.body;
-    if (!id_film || !id_utilisateur){
-        res.status(400).json({ error: 'champs vide' });
+    const token = req.cookies.token;
+    let user = null;
+
+    if(token){
+        user = await GetUserByToken(token);
     }
 
-    const film = await ajoutFilmAime(id_film, id_utilisateur);
-    if(!film){
-        res.status(400).json({error: "erreur d'insertion"});
+    if(user){
+        const {id_film} = req.body;
+        if (!id_film ){
+            res.status(400).json({ error: 'champs vide' });
+        }
+
+        const film = await ajoutFilmAime(id_film, user);
+        if(!film){
+            res.status(400).json({error: "erreur d'insertion"});
+        }
+        else{
+            res.json({message : "film inséré avec succès voici son id :" + film})
+        }
+    }else{
+        res.status(401).json({ error: "Utilisateur non authentifié" });
     }
-    else{
-        res.json({message : "film insérer avec succès voici son id :" + film})
-    }
+    
 });
 
 
@@ -748,6 +774,17 @@ async function GetFilmsByDate(date){
         SELECT * FROM Film WHERE date_sortie = ?
     `;
     const result = await db.all(query, [date]);
+
+    return result;
+}
+
+async function GetFilmsById(id){
+    const db = await getDB();
+    
+    const query = `
+        SELECT * FROM Film WHERE id = ?
+    `;
+    const result = await db.all(query, [id]);
 
     return result;
 }

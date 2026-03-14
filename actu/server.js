@@ -4,15 +4,12 @@
 // Load usefull expressjs and nodejs objects / modules
 const express = require('express');
 const path = require('path');
-const cors = require("cors");
 
 // Create our application
 const app = express();
 app.use(express.json());
 
-app.use(cors({
-  origin: "http://localhost:8080"
-}));
+
 
 // Load and register our REST API
 const api = require('./api/api');

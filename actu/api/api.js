@@ -8,7 +8,12 @@ const crypto = require("crypto");
 const linkedom = require("linkedom");
 const fs = require("fs");
 const globalagent = require('global-agent');
+const cors = require("cors");
 
+
+app.use(cors({
+  origin: "https://hyblab.polytech.univ-nantes.fr"
+}));
 // Définition des variables HTTP_PROXY si elle ne le sont pas
 // et que http_proxy l'est
 if ( process.env.HTTP_PROXY === undefined && process.env.http_proxy !== undefined)

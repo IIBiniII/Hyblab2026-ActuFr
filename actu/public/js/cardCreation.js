@@ -1,33 +1,10 @@
 function averageColor(img) {
-  // const img = document.getElementById("img");
-// const card = document.getElementById("card");
 
-// img.onload = () => {
-//   const colorThief = new ColorThief();
-//   const color = colorThief.getColor(img);
+  const colorThief = new ColorThief();
+  const color = colorThief.getColor(img);
 
-//   card.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-// };
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = img.width;
-  canvas.height = img.height;
-
-  ctx.drawImage(img,0,0);
-
-  const data = ctx.getImageData(0,0,img.width,img.height).data;
-
-  let r=0,g=0,b=0,count=0;
-
-  for(let i=0;i<data.length;i+=40){
-    r+=data[i];
-    g+=data[i+1];
-    b+=data[i+2];
-    count++;
-  }
-
-  return `rgb(${r/count},${g/count},${b/count})`;
+  return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+  
 }
 
 function createFrontCard(titre, affiche, genre, realisateur){

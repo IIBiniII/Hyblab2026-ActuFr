@@ -330,7 +330,7 @@ async function recuperation_film_site(){
     for (let i = 0; i< film.length; i++){
 
         if (film[i].textContent != "Les plus lus"){
-            const titre = film[i].querySelector("em").textContent.toLowerCase();
+            const titre = film[i].querySelector("em").textContent;
             const texte = film[i].innerHTML.split("<br>");
 
             const realisateur = texte[0]
@@ -367,7 +367,7 @@ async function recuperation_film_site(){
                 "titre" : titre,
                 "realisateur" :real,
                 "critique" :critique,
-                "nb_etoile" : etoiles,
+                "nb_etoile" : etoiles?.length,
                 "bande_annonce" : bande_annonce,
                 "affiche":ficheObj?.affiche,
                 "date":ficheObj?.date

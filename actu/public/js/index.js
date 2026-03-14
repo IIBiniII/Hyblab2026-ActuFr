@@ -11,7 +11,7 @@ const zone_contre = document.querySelector(".zoon_contre");
 const film_cards = [];
 // generate affiche
 
-const nb_card = 3;
+let nb_card = 0;
 let nb_tours = Math.round(Math.random() * 30 + 10);
 const distance = 200;
 
@@ -28,25 +28,13 @@ function degtoscale(angle) {
 
 
 
-[...Array(nb_card).keys()].forEach((index) => {
 
-  const section = createCard(
-    "LE RETOUR DU PROJECTIONNISTE",
-    "Documentaire",
-    "Orkhan Aghazadeh",
-    "Un vieil homme propose de faire revivre le cinéma dans son village."
-  );
+loadFilm().then((filmsNodes) => {
+  filmsNodes.forEach((card) => {
+    film_cards.push(card);
+    affiches.appendChild(card);
 
-  film_cards.push(section)
-
-
-  affiches.appendChild(section)
-})
-
-
-//anmation card
-film_cards.forEach((card) => {
-  const front = card.querySelector(".affiche_front");
+    const front = card.querySelector(".affiche_front");
   const back = card.querySelector(".affiche_back");
   const tl = gsap.timeline({ paused: true })
     .to(front, { duration: 1, rotationY: 180 })
@@ -59,127 +47,141 @@ film_cards.forEach((card) => {
       tl.reverse();
     }
   });
+  });
+  nb_card = film_cards.length;
 
-})
-
-
-
-const rect_poss = Array(nb_card)
-let timelinesRestantes = 0;
-film_cards.forEach((elem, index) => {
-  rect_poss[index] = elem.getBoundingClientRect();
-})
-
-
-setTimeout(function () {
-
-  window.scrollTo(0, 0);
-
+  const rect_poss = Array(nb_card)
+  let timelinesRestantes = 0;
   film_cards.forEach((elem, index) => {
+    rect_poss[index] = elem.getBoundingClientRect();
+  })
+  setTimeout(function () {
+
+    window.scrollTo(0, 0);
+
+    film_cards.forEach((elem, index) => {
 
 
-    const angle = ((2 * Math.PI) / film_cards.length) * index
+      const angle = ((2 * Math.PI) / film_cards.length) * index
 
 
 
-    const rect = rect_poss[index]
+      const rect = rect_poss[index]
 
-    gsap.set(affiches, {
-      margin: 0,
-    })
+      gsap.set(affiches, {
+        margin: 0,
+      })
 
-    gsap.set(elem, {
-      position: "absolute",
-      x: rect.left,
-      y: rect.top,
-      top: 0,
-      left: 0
-    });
-
-    timelinesRestantes += 1
-    const t1 = gsap.timeline({ ease: Linear })
-      .eventCallback("onComplete", () => {
-        timelinesRestantes--; // une timeline est finie
-        if (timelinesRestantes === 0) {
-          // Toutes les timelines sont terminées
-          observer(); // votre fonction
-        }
+      gsap.set(elem, {
+        position: "absolute",
+        x: rect.left,
+        y: rect.top,
+        top: 0,
+        left: 0
       });
 
+      timelinesRestantes += 1
+      const t1 = gsap.timeline({ ease: Linear })
+        .eventCallback("onComplete", () => {
+          timelinesRestantes--; // une timeline est finie
+          if (timelinesRestantes === 0) {
+            // Toutes les timelines sont terminées
+            observer(); // votre fonction
+          }
+        });
 
-    t1.to(elem, {
-      delay: Math.random(),
-      duration: 2,
-      y: rect.top - 50
-    })
-      .to(elem, {
-        duration: 1,
-        y: Math.sin(angle) * distance + (window.innerHeight / 2),
-        z: Math.cos(angle) * distance,
-        x: (window.innerWidth / 2),
-        scale: degtoscale(angle),
-        xPercent: -50,
-        yPercent: -50,
-      }, 3)
 
-      ;[...Array(nb_tours).keys()].forEach(decalage => {
-        decalage = decalage + 1;
-        const angle = ((2 * Math.PI) / film_cards.length) * ((index + decalage) % film_cards.length)
-
-        t1.to(elem, {
-          duration: 0.5 * (decalage / nb_tours) / 2,
-          y: Math.sin(angle) * distance + (window.innerHeight / 2),// + window.innerHeight/2,
+      t1.to(elem, {
+        delay: Math.random(),
+        duration: 2,
+        y: rect.top - 50
+      })
+        .to(elem, {
+          duration: 1,
+          y: Math.sin(angle) * distance + (window.innerHeight / 2),
           z: Math.cos(angle) * distance,
           x: (window.innerWidth / 2),
           scale: degtoscale(angle),
           xPercent: -50,
           yPercent: -50,
+        }, 3)
+
+        ;[...Array(nb_tours).keys()].forEach(decalage => {
+          decalage = decalage + 1;
+          const angle = ((2 * Math.PI) / film_cards.length) * ((index + decalage) % film_cards.length)
+
+          t1.to(elem, {
+            duration: 0.5 * (decalage / nb_tours) / 2,
+            y: Math.sin(angle) * distance + (window.innerHeight / 2),// + window.innerHeight/2,
+            z: Math.cos(angle) * distance,
+            x: (window.innerWidth / 2),
+            scale: degtoscale(angle),
+            xPercent: -50,
+            yPercent: -50,
+          })
         })
-      })
 
 
 
 
-    if ((index + nb_tours) % film_cards.length == 0) {
-      t1.to(elem, {
-        duration: 1,
-        x: window.innerWidth / 2 - 100,
-      }, "+=0")
-        .to(zone_contre, {
+      if ((index + nb_tours) % film_cards.length == 0) {
+        t1.to(elem, {
           duration: 1,
-          "--transparance_contre": "100%"
-        }, "<")
-        .to(elem, {
-          duration: 1,
-          x: window.innerWidth / 2,
+          x: window.innerWidth / 2 - 100,
         }, "+=0")
-        .to(zone_contre, {
-          duration: 1,
-          "--transparance_contre": "70%"
-        }, "<")
+          .to(zone_contre, {
+            duration: 1,
+            "--transparance_contre": "100%"
+          }, "<")
+          .to(elem, {
+            duration: 1,
+            x: window.innerWidth / 2,
+          }, "+=0")
+          .to(zone_contre, {
+            duration: 1,
+            "--transparance_contre": "70%"
+          }, "<")
 
-        .to(elem, {
-          duration: 1,
-          x: window.innerWidth / 2 + 100,
-        }, "+=0")
-        .to(zone_pour, {
-          duration: 1,
-          "--transparance_pour": "0%"
-        }, "<")
-        .to(elem, {
-          duration: 1,
-          x: window.innerWidth / 2,
-        }, "+=0")
-        .to(zone_pour, {
-          duration: 1,
-          "--transparance_pour": "30%"
-        }, "<")
-    }
+          .to(elem, {
+            duration: 1,
+            x: window.innerWidth / 2 + 100,
+          }, "+=0")
+          .to(zone_pour, {
+            duration: 1,
+            "--transparance_pour": "0%"
+          }, "<")
+          .to(elem, {
+            duration: 1,
+            x: window.innerWidth / 2,
+          }, "+=0")
+          .to(zone_pour, {
+            duration: 1,
+            "--transparance_pour": "30%"
+          }, "<")
+      }
 
 
-  })
+    })
 
-}, 2000);
+  }, 2000);
+  film_cards[(film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length]?.setAttribute("style", "border:3px solid red;")
+
+
+});
+
+
+
+
+
+
+//anmation card
+
+
+
+
+
+
+
 
 
 
@@ -206,7 +208,6 @@ setTimeout(function () {
 
 
 
-film_cards[(film_cards.length + (-nb_tours) % film_cards.length) % film_cards.length].setAttribute("style", "border:3px solid red;")
 
 
 function observer() {

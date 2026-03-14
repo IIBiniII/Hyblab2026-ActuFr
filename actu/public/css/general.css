@@ -1,24 +1,25 @@
 
 :root{
     --white : #FFF;
-    
+    --red : #E5231A;
+    --green : #6ECA97
 }
 
 
 @font-face {
   font-family: "Black_italic";
-  src: url("fonts/Montserrat-Black.ttf") format("truetype");
+  src: url("../fonts/Montserrat-Black.ttf") format("truetype");
   font-weight: 900;
   font-style: italic;
 }
 
 @font-face {
   font-family: "semi_blod_italic";
-  src: url("fonts/montserrat.black-italic.ttf") format("truetype");
+  src: url("../fonts/montserrat.black-italic.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
 }
 
-h3, p{
+h2, h3, p{
     margin: 0;
 }

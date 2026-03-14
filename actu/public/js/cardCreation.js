@@ -102,3 +102,5 @@ function createCard(titre, genre, realisateur, description,index){
 
   return section;
 }
+
+

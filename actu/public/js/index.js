@@ -1,5 +1,6 @@
 "use strict"
 
+
 gsap.ticker.fps(30);
 
 
@@ -11,7 +12,7 @@ const zone_contre = document.querySelector(".zoon_contre");
 const film_cards = [];
 // generate affiche
 
-const nb_card = 10;
+const nb_card = 20;
 let nb_tours = Math.round(Math.random() * 30 + 10);
 const distance = 200;
 
@@ -59,11 +60,14 @@ film_cards.forEach((card) => {
     .to(back, { duration: 1, rotationY: 0 }, 0)
 
   card.addEventListener("click", function () {
-    if (tl.progress() === 0) {
-      tl.play();
-    } else {
-      tl.reverse();
+    if (card == film_cards[get_current_index()]) {
+      if (tl.progress() === 0) {
+        tl.play();
+      } else {
+        tl.reverse();
+      }
     }
+
   });
 
 })
@@ -72,118 +76,154 @@ film_cards.forEach((card) => {
 
 
 const rect_poss = Array(nb_card)
-let timelinesRestantes = 0;
 film_cards.forEach((elem, index) => {
   rect_poss[index] = elem.getBoundingClientRect();
 })
 
 
-setTimeout(() => {
 
-  window.scrollTo(0, 0);
+//début annimation
+const tl = gsap.timeline({
+  ease: "linear",
+  onComplete: observer
+})
 
+tl.from(".text_intro h2", {
+  duration: 1.2,
+  y: 80,
+  opacity: 0,
+  ease: "power4.out"
+})
 
-  const total = film_cards.length
-  const getAngle = (i) => ((2 * Math.PI) / total) * i
+  .from(".text_intro p", {
+    duration: 1,
+    y: 40,
+    opacity: 0,
+    ease: "power3.out"
+  }, "-=0.6")
 
-  gsap.set(affiches, {
-    margin: 0
+  .from(".logos img", {
+    duration: 0.8,
+    scale: 0,
+    opacity: 0,
+    stagger: 0.2,
+    ease: "back.out(1.7)"
+  }, "-=0.4")
+
+  .to(".text_intro", {
+    duration: 1,
+    x: `-=${window.innerWidth}`,
+    rotateY: "-=700deg",
+    rotateZ: "-=30deg",
+    rotateX: "-=30deg",
+  }, "+=2")
+  .from(".affiches", {
+    filter: "blur(4px)",
   })
 
-  gsap.set(film_cards, {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    x: (i) => rect_poss[i].left,
-    y: (i) => rect_poss[i].top,
-    clearProps: "height,width"
 
-  })
 
-  const tl = gsap.timeline({
-    ease: "linear",
-    onComplete: observer
-  })
+
+
+const total = film_cards.length
+const getAngle = (i) => ((2 * Math.PI) / total) * i
+
+gsap.set(affiches, {
+  margin: 0
+})
+
+gsap.set(film_cards, {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  x: (i) => rect_poss[i].left,
+  y: (i) => rect_poss[i].top,
+  clearProps: "height,width"
+
+})
+
+
+
+tl.to(film_cards, {
+  delay: () => Math.random(),
+  duration: 2,
+  y: (i) => rect_poss[i].top - 50,
+  rotate : (i) => Math.random()*20 - 10 
+})
+
+// placement dans le cercle
+tl.to(film_cards, {
+  delay: (i) => ((total + (i - (total / 2))) % total) * 0.2,
+  duration: 0.2,
+  x: window.innerWidth / 2,
+  y: (i) => Math.sin(getAngle(i)) * distance + window.innerHeight / 2,
+  z: (i) => Math.cos(getAngle(i)) * distance,
+  rotate:0,
+  xPercent: -50,
+  yPercent: -50,
+  scale: 1,
+  onComplete: () => {
+    gsap.set(film_cards, { clearProps: "scale" });
+  }
+})
+for (let tour = 1; tour <= nb_tours; tour++) {
 
   tl.to(film_cards, {
-    delay: () => Math.random(),
-    duration: 2,
-    y: (i) => rect_poss[i].top - 50
-  })
-
-  // placement dans le cercle
-  tl.to(film_cards, {
-    delay: (i) => ((total + (i - (total / 2))) % total) * 0.2,
-    duration: 0.2,
-    x: window.innerWidth / 2,
-    y: (i) => Math.sin(getAngle(i)) * distance + window.innerHeight / 2,
-    z: (i) => Math.cos(getAngle(i)) * distance,
+    duration: 0.5 * (tour / nb_tours) / 2,
     xPercent: -50,
     yPercent: -50,
-    scale: 1,
-    onComplete: () => {
-      gsap.set(film_cards, { clearProps: "scale" });
-    }
+
+    y: (i) => {
+      const actual_index = (i + tour) % total
+      const angle = getAngle(actual_index)
+      return Math.sin(angle) * distance + window.innerHeight / 2
+    },
+
+    z: (i) => {
+      const actual_index = (i + tour) % total
+      const angle = getAngle(actual_index)
+      return Math.cos(angle) * distance
+    },
+    x: window.innerWidth / 2,
+
+
   })
-  for (let tour = 1; tour <= nb_tours; tour++) {
-
-    tl.to(film_cards, {
-      duration: 0.5 * (tour / nb_tours) / 2,
-      xPercent: -50,
-      yPercent: -50,
-
-      y: (i) => {
-        const actual_index = (i + tour) % total
-        const angle = getAngle(actual_index)
-        return Math.sin(angle) * distance + window.innerHeight / 2
-      },
-
-      z: (i) => {
-        const actual_index = (i + tour) % total
-        const angle = getAngle(actual_index)
-        return Math.cos(angle) * distance
-      },
-      x: window.innerWidth / 2,
+}
 
 
-    })
-  }
+const current_elem = film_cards[get_current_index()]
 
-
-  const current_elem = film_cards[get_current_index()]
-
-  tl.to(current_elem, {
+tl.to(current_elem, {
+  duration: 1,
+  x: `-=${100}`, // aller à gauche
+  repeat: 1,      // revient automatiquement au centre
+  yoyo: true,
+  ease: "power1.inOut"
+})
+  .to(zone_contre, {
     duration: 1,
-    x: `-=${100}`, // aller à gauche
-    repeat: 1,      // revient automatiquement au centre
+    "--transparance_contre": "100%",
+    repeat: 1,
+    yoyo: true,
+    ease: "power1.inOut"
+  }, "<")
+  .to(current_elem, {
+    duration: 1,
+    x: `+=100`, // aller à droite
+    repeat: 1,
     yoyo: true,
     ease: "power1.inOut"
   })
-    .to(zone_contre, {
-      duration: 1,
-      "--transparance_contre": "100%",
-      repeat: 1,
-      yoyo: true,
-      ease: "power1.inOut"
-    }, "<")
-    .to(current_elem, {
-      duration: 1,
-      x: `+=100`, // aller à droite
-      repeat: 1,
-      yoyo: true,
-      ease: "power1.inOut"
-    })
-    .to(zone_pour, {
-      duration: 1,
-      "--transparance_pour": "0%",
-      repeat: 1,
-      yoyo: true,
-      ease: "power1.inOut"
-    }, "<");
+  .to(zone_pour, {
+    duration: 1,
+    "--transparance_pour": "0%",
+    repeat: 1,
+    yoyo: true,
+    ease: "power1.inOut"
+  }, "<");
 
 
 
-}, 2000);
 
 
 
@@ -227,7 +267,7 @@ function observer() {
             console.log(angle)
             console.log(decalageY)
             console.log((((2 * Math.PI) / film_cards.length) * ((current_index + nb_tours) % film_cards.length)))
-            console.log(Math.sin(angle) * distance + window.innerHeight / 2,window.innerHeight / 2)
+            console.log(Math.sin(angle) * distance + window.innerHeight / 2, window.innerHeight / 2)
             return Math.sin(angle) * distance + window.innerHeight / 2
           },
 

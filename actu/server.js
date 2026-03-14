@@ -7,6 +7,7 @@ const path = require('path');
 
 // Create our application
 const app = express();
+app.use(express.json());
 
 // Load and register our REST API
 const api = require('./api/api');

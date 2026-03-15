@@ -110,6 +110,7 @@ body{
     width: 335px;
     height: 613px;
     z-index: -1;
+    user-select: none;
     filter: blur(5px);
 }
 
@@ -121,7 +122,7 @@ body{
 .film > .affiche_back > div:first-of-type{
 
     background-color: white;
-    border-radius: 5.88px;
+    border-radius: 20px;
     padding: 66px 36px 15px;
     margin: 20px;
 
@@ -140,6 +141,7 @@ body{
     font-size: 14px;
 }
 .film > .affiche_back > div:first-of-type img{
+    user-select: none;
     width: 26px;
 }
 
@@ -153,7 +155,8 @@ body{
 
 .film > .affiche_back > div:last-of-type img{
     width: 48px;
-    
+    user-select: none;
+
 }
 
 

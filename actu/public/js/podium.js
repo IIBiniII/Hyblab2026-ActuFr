@@ -78,6 +78,7 @@ async function buildBackSide() {
         <span class="back-item-critic">${movie?.realisateur || ''}</span>
         <div class="back-item-stars">${scoreToStars(nb_etoile)}</div>
       </div>
+      
     `;
     backList.appendChild(item);
   });

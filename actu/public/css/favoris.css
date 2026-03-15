@@ -45,20 +45,10 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 2%;
+  gap: 6%;
   padding: 6% 5% 4%;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 8vw;
-  line-height: 1;
-  color: var(--color-title);
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-}
 
 .page-title {
   height: 10%;

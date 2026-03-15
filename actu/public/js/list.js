@@ -2,7 +2,12 @@
 const MovieList = (() => {
   let isExpanded = false;
 
-  function createItem(affiche, titre, realisateur, rank, like_pourcentage, index) {
+  function createItem(affiche, titre, realisateur, rank, like_pourcentage, index, critique, nb_etoile, lien_bande_annonce, lien_article) {
+
+
+    if (affiche == null) {
+      affiche = "img/affiche-cine.png"
+    }
 
     const div = document.createElement('div');
     div.className = 'list-item ';
@@ -36,6 +41,10 @@ const MovieList = (() => {
 
     </div>
     `;
+
+    div.addEventListener("click", () => {
+      card_apparition(affiche, titre, realisateur, critique, nb_etoile, lien_bande_annonce, lien_article)
+    })
     return div;
   }
 
@@ -45,13 +54,13 @@ const MovieList = (() => {
     const list = document.querySelector('.list');
     if (!list) return;
 
-    const {filmLiked, classement} = await loadClassement();
+    const { filmLiked, classement } = await loadClassement();
 
     //récupération des films liké par l'utilisateur
     let likedMovies = null
-    if (like_only){
+    if (like_only) {
       likedMovies = filmLiked;
-    }else{
+    } else {
       likedMovies = classement;
     }
 
@@ -59,12 +68,22 @@ const MovieList = (() => {
 
     let i = likedMovies.length;
 
-      likedMovies.forEach(element => {
-        const ratio_like = (element.nb_likes / (element.nb_likes + element.nb_dislikes))*100 || 0
-        const item = createItem(element?.affiche, element?.nom, element?.realisateur, element?.classement, ratio_like, i);
-        item.dataset.id = element.id;
-        list.appendChild(item);
-      });
+    likedMovies.forEach(element => {
+      const ratio_like = (element.nb_likes / (element.nb_likes + element.nb_dislikes)) * 100 || 0
+      const item = createItem(
+        element?.affiche,
+        element?.nom,
+        element?.realisateur,
+        element?.classement,
+        ratio_like,
+        i,
+        element.critique,
+        element.nb_etoile,
+        element.bande_annonce,
+        "#");
+      item.dataset.id = element.id;
+      list.appendChild(item);
+    });
   }
 
   function toggle() {
@@ -121,3 +140,59 @@ const MovieList = (() => {
 document.addEventListener('DOMContentLoaded', () => {
   MovieList.init('data/movies.json');
 });
+
+
+function card_apparition(affiche, titre, realisateur, critique, nb_etoile, lien_bande_annonce, lien_article) {
+
+
+  const carte = createCard(titre, affiche, "  ", realisateur, critique, nb_etoile, lien_bande_annonce, lien_article)
+  document.querySelector("body").appendChild(carte)
+  gsap.set(carte, {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    xPercent: -50,
+    yPercent: -50,
+    scale: 1,
+    clearProps: "height,width"
+  })
+
+  const front = carte.querySelector(".affiche_front");
+  const back = carte.querySelector(".affiche_back");
+  const tl = gsap.timeline({ paused: true })
+    .to(front, { duration: 1, rotationY: 180 })
+    .to(back, { duration: 1, rotationY: 0 }, 0)
+
+  carte.addEventListener("click", function () {
+    if (tl.progress() === 0) {
+      tl.play();
+    } else {
+      tl.reverse();
+    }
+  })
+
+  gsap.from(carte, {
+    duration: 0.5,
+    yPercent: 100,
+    y: window.innerHeight / 2,
+    onComplete: () => {
+      clickOutside = (e) => {
+        if (!carte.contains(e.target)) {
+          gsap.to(carte,{
+            duration: 0.5,
+            yPercent: 100,
+            y: window.innerHeight / 2,
+            onComplete: () => carte.remove()
+          })
+          
+          document.removeEventListener("click", clickOutside);
+        }
+      }
+
+      document.addEventListener("click", clickOutside);
+    }
+  })
+
+
+
+}

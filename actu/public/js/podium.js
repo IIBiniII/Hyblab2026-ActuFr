@@ -90,7 +90,8 @@ function initFlip() {
   card.addEventListener('click', (e) => {
     if (
       e.target.closest('.step-img') ||
-      e.target.closest('.toggle-btn')
+      e.target.closest('.toggle-btn') ||
+      e.target.closest('.list')
     ) return;
 
     card.classList.toggle('is-flipped');

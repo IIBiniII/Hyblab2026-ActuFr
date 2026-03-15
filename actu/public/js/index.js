@@ -42,10 +42,6 @@ function degtoscale(angle) {
 
 loadFilm().then((filmsNodes) => {
 
-  if (filmsNodes.length == 0) {
-    window.location.href = "podium.html"
-  }
-
   filmsNodes.forEach((card) => {
     film_cards.push(card);
     affiches.appendChild(card);
@@ -69,6 +65,7 @@ loadFilm().then((filmsNodes) => {
 }).finally(() => {
 
   window.scrollTo(0, 0);
+
 
 
   const rect_poss = Array(nb_card)
@@ -114,6 +111,17 @@ loadFilm().then((filmsNodes) => {
     .from(".affiches", {
       filter: "blur(4px)",
     })
+
+  if (film_cards.length === 0) {
+    const text = text_fin()
+    tl.from(text, {
+      duration: 5,
+      opacity: 0,
+      y: "-=200",
+      onComplete: () => window.location.href = "podium.html"
+    })
+    return;
+  }
 
   total = film_cards.length
   const getAngle = (i) => ((2 * Math.PI) / total) * i
@@ -182,14 +190,11 @@ loadFilm().then((filmsNodes) => {
     }).to("body", {
       duration: dur,
       backgroundColor: () => cur_elem.querySelector(".affiche_front").style.backgroundColor
-    },"<")
+    }, "<")
   }
 
 
   const current_elem = film_cards[get_current_index()]
-
-
-
 
   tl.to(current_elem.querySelector(".affiche_front"), {
     duration: 1,
@@ -392,19 +397,19 @@ function observer() {
         film_cards.splice(curentX_film_index, 1);
 
 
-        const compteur = create_view_compter(film_cards.length,total);
+        const compteur = create_view_compter(film_cards.length, total);
         const green = getComputedStyle(document.documentElement).getPropertyValue("--green")
-          
-        gsap.timeline({ease: "power4.out"}).set(compteur,{
-          color : green,
-        }).from(compteur,{
-          duration : 1,
-          x : decalageX,
+
+        gsap.timeline({ ease: "power4.out" }).set(compteur, {
+          color: green,
+        }).from(compteur, {
+          duration: 1,
+          x: decalageX,
           rotate: 100,
-        }).to(compteur,{
-          duration:0.2,
-          opacity:0,
-          onComplete: ()=>compteur.remove()
+        }).to(compteur, {
+          duration: 0.2,
+          opacity: 0,
+          onComplete: () => compteur.remove()
         })
 
 
@@ -427,18 +432,18 @@ function observer() {
 
         film_cards.splice(curentX_film_index, 1);
 
-        const compteur = create_view_compter(film_cards.length,total)
+        const compteur = create_view_compter(film_cards.length, total)
         const red = getComputedStyle(document.documentElement).getPropertyValue("--red")
-        gsap.timeline({ease: "power4.out"}).set(compteur,{
-          color : red,
-        }).from(compteur,{
-          duration : 1,
-          x : decalageX,
+        gsap.timeline({ ease: "power4.out" }).set(compteur, {
+          color: red,
+        }).from(compteur, {
+          duration: 1,
+          x: decalageX,
           rotate: 100,
-        }).to(compteur,{
-          duration:0.2,
-          opacity:0,
-          onComplete: ()=>compteur.remove()
+        }).to(compteur, {
+          duration: 0.2,
+          opacity: 0,
+          onComplete: () => compteur.remove()
         })
 
         updateroue();
@@ -482,14 +487,12 @@ function observer() {
 function updateroue() {
   if (film_cards.length === 0) {
     const text = text_fin()
-    gsap.from(text,{
+    gsap.from(text, {
       duration: 5,
-      opacity : 0,
-      y : "-=200",
+      opacity: 0,
+      y: "-=200",
       onComplete: () => window.location.href = "podium.html"
     })
-
-    
     return;
   }
 
@@ -517,7 +520,7 @@ setTimeout(() => {
 }, 500)
 
 
-function create_view_compter(cpt,total){
+function create_view_compter(cpt, total) {
   const compteur = document.createElement("span")
   compteur.innerText = `${cpt}/${total}`
   compteur.classList.add("compteur")
@@ -526,7 +529,7 @@ function create_view_compter(cpt,total){
   return compteur
 }
 
-function text_fin(){
+function text_fin() {
   const text_fin = document.createElement("h1")
   text_fin.innerText = "Il n'y a plus de film.\nRevenez la semaine prochaine pour découvrir de nouveaux films"
   text_fin.classList.add("text_fin")

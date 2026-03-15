@@ -2,7 +2,8 @@ async function loadpodium(){
   const {userLikes,classement} = await loadClassement();
   // const classement = await classementResponse.json();
   const podium = classement.slice(0,3);
-  const container = document.getElementById('podium-container');
+  const container = document.querySelector('#podium-container');
+  console.log(classement);
   console.log(podium);
   let stepsHtmlString = podium.map(item => `
       <div class="step step-${item?.classement}">

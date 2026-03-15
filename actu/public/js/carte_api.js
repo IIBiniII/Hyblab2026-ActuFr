@@ -83,30 +83,8 @@ async function loadFilmsAime(){
         credentials: "include"
     });
     const films = await filmsResponse.json(); //id_film, id_utilisateur
-    let films_aime= [];
-    films.forEach(async element =>{
-        const id_film = element.id_film;
-        const filmResponse = await fetch(API + "/film/"+id_film , {
-            method: "GET",
-            credentials: "include"
-        });
-        const _film = await filmResponse.json();
-
-        const titre = _film.titre;
-        const affiche = _film.affiche;
-        const realisateur = _film.realisateur;
-        const nb_like = element.nb_likes;
-
-        const film = {
-            "titre" :titre,
-            "affiche" :affiche,
-            "realisateur" :realisateur,
-            "nb_like":nb_like,
-        }
-
-        films_aime.push(film);
-    })
-    return films_aime;
+    
+    return films;
 }
 
 async function ajoutLike(film){

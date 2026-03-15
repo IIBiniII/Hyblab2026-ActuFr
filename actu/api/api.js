@@ -1025,7 +1025,7 @@ async function ajoutFilmCoupDeCoeur(id_film, date){
     const db = await getDB();
 
     const insert = await db.run(`
-        INSERT OR IGNORE INTO Film (id_film, date) VALUES (?,?)
+        INSERT OR IGNORE INTO FilmCoupDeCoeur (id_film, date) VALUES (?,?)
     `,[id_film,date]);
 
     return insert.lastID;

@@ -20,37 +20,42 @@ async function loadFilm(){
     });
 
     return filmsNodes;
-    
+}
+
+async function loadClassement(){
+    const classementResponse = await fetch(API + "/film-ranking", {
+        method: "GET",
+        credentials: "include"
+    });
+    let classement = await classementResponse.json();
+    const nb_films = classement.length || 0;
+    classement = classement.sort((a,b)=>{
+        const aRatio = a?.nb_likes/a?.nb_dislikes;
+        const bRatio = b?.nb_likes/b?.nb_dislikes;
+        return aRatio<bRatio;
+    }).map((obj, index) => ({
+        ...obj,
+        classement: index
+    }));
+
+    const filmLikedResponse = await fetch(API + "/film-like", {
+        method: "GET",
+        credentials: "include"
+    });
+    let filmLiked = await filmLikedResponse.json();
+    filmLiked = filmLiked.filter((f) => {
+            return classement.some((e) => f?.nom === e?.nom);
+        });
+    return {filmLiked,classement};
 
 }
 
-// async function loadClassement(){
-//     let list_classement = [];
-//     const classementResponse = await fetch(API + "/film-ranking", {
-//         method: "GET",
-//         credentials: "include"
-//     });
-//     const classement = await classementResponse.json();
-//     //titre + nb de likes
-//     classement.forEach(async element => {
-//         const id_film = element.film; //c'est l'ID
-//         // const filmResponse = await fetch(API + "/film/"+id_film , {
-//         //     method: "GET",
-//         //     credentials: "include"
-//         // });
-//         // const film = await filmResponse.json();
-//         const nb_like = element.nb_likes;
-//     })
 
-// }
-
-// loadClassement()
-
-// async function loadCoupDeCoeur(){
-//     const filmResponse = await fetch(API + "/film-bestofweek", {
-//         method: "GET",
-//         credentials: "include"
-//     });
-//     const film = await filmResponse.json();
-//     return film;
-// }
+async function loadCoupDeCoeur(){
+    const filmResponse = await fetch(API + "/film-bestofweek", {
+        method: "GET",
+        credentials: "include"
+    });
+    const film = await filmResponse.json();
+    return film;
+}

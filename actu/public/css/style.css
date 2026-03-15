@@ -263,3 +263,17 @@ body{
 .red_span{
     color: var(--red);
 }
+
+span.compteur{
+    /* display: none; */
+
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    font-family: "Black_italic";
+    font-size: 60px;
+    opacity: 0.9;
+
+    transform: translate(-50%,-50%);
+}

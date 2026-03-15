@@ -1,6 +1,7 @@
 "use strict"
 
 
+
 gsap.ticker.fps(30);
 
 
@@ -18,6 +19,8 @@ const film_cards = [];
 let nb_card = 0;
 let nb_tours = Math.round(Math.random() * 30 + 10);
 const distance = 100;
+
+let total = 0
 
 
 function get_current_index() {
@@ -112,7 +115,7 @@ loadFilm().then((filmsNodes) => {
       filter: "blur(4px)",
     })
 
-  const total = film_cards.length
+  total = film_cards.length
   const getAngle = (i) => ((2 * Math.PI) / total) * i
 
   gsap.set(affiches, {
@@ -387,6 +390,22 @@ function observer() {
         });
 
         film_cards.splice(curentX_film_index, 1);
+
+
+        const compteur = create_view_compter(film_cards.length,total);
+        const green = getComputedStyle(document.documentElement).getPropertyValue("--green")
+
+        gsap.timeline().set(compteur,{
+          color : green,
+        }).from(compteur,{
+          duration : 1,
+          x : decalageX,
+          rotate: 100,
+          ease: "power4.out",
+          onComplete: ()=>compteur.remove()
+        })
+
+
         updateroue();
       }
       else if (decalageX < -100) {
@@ -405,6 +424,19 @@ function observer() {
         });
 
         film_cards.splice(curentX_film_index, 1);
+
+        const compteur = create_view_compter(film_cards.length,total)
+        const red = getComputedStyle(document.documentElement).getPropertyValue("--red")
+        gsap.timeline().set(compteur,{
+          color : red,
+        }).from(compteur,{
+          duration : 1,
+          x : decalageX,
+          rotate: 100,
+          ease: "power4.out",
+
+          onComplete: ()=>compteur.remove()
+        })
 
         updateroue();
       } else {
@@ -471,4 +503,14 @@ function updateroue() {
 
 setTimeout(() => {
   window.scrollTo(0, 0);
-}, 1000)
+}, 500)
+
+
+function create_view_compter(cpt,total){
+  const compteur = document.createElement("span")
+  compteur.innerText = `${cpt}/${total}`
+  compteur.classList.add("compteur")
+
+  document.querySelector("body").appendChild(compteur);
+  return compteur
+}

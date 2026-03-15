@@ -290,3 +290,11 @@ h1.text_fin{
     padding: 30px;
 
 }
+
+.end_button{
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    margin: 10px;
+    transform: translate(-50%);
+}

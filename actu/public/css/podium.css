@@ -192,7 +192,7 @@ html, body {
 
 /* ==================== BACK PAGE ==================== */
 .page-back {
-  background: var(--color2);
+  background: var(--background-color);
   padding: 20px 16px 16px;
   gap: 14px;
   overflow: hidden;

@@ -562,5 +562,6 @@ html, body {
   justify-content: right;
 }
 .heartToFavoris{
+  width: 10%;
   padding-right: 13%;
 }

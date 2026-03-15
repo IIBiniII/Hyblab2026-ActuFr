@@ -47,15 +47,67 @@ async function loadClassement(){
             return classement.some((e) => f?.nom === e?.nom);
         });
     return {filmLiked,classement};
-
 }
 
 
 async function loadCoupDeCoeur(){
-    const filmResponse = await fetch(API + "/film-bestofweek", {
+    const filmCoeurResponse = await fetch(API + "/film-bestofweek", {
+        method: "GET",
+        credentials: "include"
+    });
+    const filmCoeur = await filmCoeurResponse.json();
+    const id_film = film.id_film;
+    const filmResponse = await fetch(API + "//film-id/"+id_film, {
         method: "GET",
         credentials: "include"
     });
     const film = await filmResponse.json();
-    return film;
+    const affiche = film.affiche;
+}
+
+async function loadFilmsAime(){
+    //juste des id des films
+    const filmsResponse = await fetch(API + "/film-like", {
+        method: "GET",
+        credentials: "include"
+    });
+    const films = await filmsResponse.json(); //id_film, id_utilisateur
+    let films_aime= [];
+    films.forEach(async element =>{
+        const id_film = element.id_film;
+        const filmResponse = await fetch(API + "/film/"+id_film , {
+            method: "GET",
+            credentials: "include"
+        });
+        const _film = await filmResponse.json();
+
+        const titre = _film.titre;
+        const affiche = _film.affiche;
+        const realisateur = _film.realisateur;
+        const nb_like = element.nb_likes;
+
+        const film = {
+            "titre" :titre,
+            "affiche" :affiche,
+            "realisateur" :realisateur,
+            "nb_like":nb_like,
+        }
+
+        films_aime.push(film);
+    })
+    return films_aime;
+}
+
+async function ajoutLike(film){
+    const response = await fetch(API + "/film-like", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            id_film : film,
+        })
+    });
+    const data = await response.json();
 }

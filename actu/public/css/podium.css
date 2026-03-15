@@ -312,9 +312,9 @@ html, body {
 }
 
 .star {
-  font-size: 13px;
+  /* font-size: 13px; */
   color: #FFD600;
-  line-height: 1;
+  /* line-height: 1; */
 }
 
 .star.empty {

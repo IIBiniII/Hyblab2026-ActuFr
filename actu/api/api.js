@@ -194,7 +194,7 @@ app.get('/film-ranking', async (req, res) => {
         res.json(films);
     }
     else{
-        res.status(401).json({ error: "Aucun films" });
+        res.status(404).json({ error: "Aucun films" });
     }
 });
 
@@ -884,7 +884,7 @@ async function GetClassement(date){
     
     const query = `
         SELECT 
-            F.nom,
+            F.*,
             COUNT(FA.id_utilisateur) AS nb_likes,
             COUNT(FAP.id_utilisateur) AS nb_dislikes
         FROM film F

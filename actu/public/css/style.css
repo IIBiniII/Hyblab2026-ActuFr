@@ -26,6 +26,7 @@ body{
 .film{
     transform-origin: top left;
     position: relative;
+
 }
 
 
@@ -67,7 +68,6 @@ body{
 
     display: flex;
     flex-direction: column;
-    border-radius: 20px;
 }
 
 .film > .affiche_front > div:last-child{
